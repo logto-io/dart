@@ -1,0 +1,28 @@
+name: logto_dart_sdk
+
+packages:
+  - packages/**
+
+repository: https://github.com/logto-io/dart.git
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  test:selective_unit_test:
+    run: melos exec --dir-exists="test" --fail-fast -- flutter test --no-pub --coverage
+    description: Run Flutter tests for a specific package in this project.
+    select-package:
+      flutter: true
+      dir-exists: test
+  test:
+    run: melos run test:selective_unit_test --no-select
+    description: Run all Flutter tests in this
+
+  analyze:
+    run: melos exec -- flutter analyze .
+    description: Run `dart analyze` in all packages.
+
+ide:
+  intellij: false
