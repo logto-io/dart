@@ -1,4 +1,4 @@
-library dart_sdk;
+library logto_dart_sdk;
 
 /// A Calculator.
 class Calculator {
