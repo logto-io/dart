@@ -23,8 +23,11 @@ jobs:
         with:
           channel: stable
 
-      - name: analyze
+      - name: Install
+        run: flutter pub get
+
+      - name: Analyze
         run: flutter analyze
 
-      - name: test
+      - name: Test
         run: flutter test --no-pub --coverage
