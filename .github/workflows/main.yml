@@ -23,11 +23,8 @@ jobs:
         with:
           channel: stable
 
-      - name: Setup Melos
-        uses: bluefireteam/melos-action@v1 # will run bootstrap by default
-
       - name: analyze
-        run: melos run analyze
+        run: flutter analyze
 
       - name: test
-        run: melos run test
+        run: flutter test --no-pub --coverage
