@@ -47,7 +47,9 @@ jobs:
         run: flutter pub get
 
       - name: Analyze
-        run: cd example && flutter analyze --no-pub
+        working-directory: ./example
+        run: flutter analyze --no-pub
 
       - name: Test
-        run: cd example && flutter test --no-pub --coverage
+        working-directory: ./example
+        run: flutter test --no-pub --coverage
