@@ -21,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: "stable"
+          channel: stable
 
       - name: Setup Melos
         uses: bluefireteam/melos-action@v1 # will run bootstrap by default
