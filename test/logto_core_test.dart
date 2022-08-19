@@ -11,7 +11,7 @@ void main() {
     const String codeChallenge = 'foo_code_challenge';
     const String state = 'foo_state';
 
-    var signInUri = Core.generateSignInUri(
+    var signInUri = LogtoCore.generateSignInUri(
         authorizationEndpoint: authorizationEndpoint,
         clientId: clientId,
         redirectUri: redirectUri,
@@ -26,13 +26,13 @@ void main() {
     expect(signInUri.queryParameters,
         containsPair('code_challenge', codeChallenge));
     expect(signInUri.queryParameters,
-        containsPair('code_challenge_method', Core.codeChallengeMethod));
+        containsPair('code_challenge_method', LogtoCore.codeChallengeMethod));
     expect(signInUri.queryParameters, containsPair('state', state));
     expect(signInUri.queryParameters,
         containsPair('scope', reservedScopes.join(' ')));
     expect(signInUri.queryParameters,
-        containsPair('response_type', Core.responseType));
-    expect(signInUri.queryParameters, containsPair('prompt', Core.prompt));
+        containsPair('response_type', LogtoCore.responseType));
+    expect(signInUri.queryParameters, containsPair('prompt', LogtoCore.prompt));
   });
 
   test('Generate SignOut Uri', () {
@@ -40,7 +40,7 @@ void main() {
     const String idToken = 'foo_id_token';
     const String postLogoutRedirectUri = 'http://foo.app.io';
 
-    var signOutUri = Core.generateSignOutUri(
+    var signOutUri = LogtoCore.generateSignOutUri(
         endSessionEndpoint: endSessionEndpoint,
         idToken: idToken,
         postLogoutRedirectUri: Uri.parse(postLogoutRedirectUri));
