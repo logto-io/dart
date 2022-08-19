@@ -1,4 +1,4 @@
-import '/interfaces/logto_config.dart';
+import '/src/interfaces/logto_config.dart';
 
 // Logto SDK
 class Logto {

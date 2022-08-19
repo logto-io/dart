@@ -1,5 +1,4 @@
-import 'interfaces/logto_interfaces.dart';
-import 'utilities/utils.dart';
+import '/src/utilities/utils.dart';
 
 class Core {
   static const String codeChallengeMethod = 'S256';

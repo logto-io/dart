@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:logto_dart_sdk/logto_core.dart';
-import 'package:logto_dart_sdk/utilities/constants.dart';
-import 'package:logto_dart_sdk/utilities/utils.dart';
+import 'package:logto_dart_sdk/src/utilities/constants.dart';
 
 void main() {
   test('Generate SignIn Uri', () {
