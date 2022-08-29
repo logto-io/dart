@@ -11,8 +11,9 @@ class LogtoCore {
   static const String responseType = 'code';
   static const String prompt = 'consent';
 
-  static Future<OidcProviderConfig> fetchOidcConfig(String endpoint) async {
-    final response = await http.get(Uri.parse(endpoint));
+  static Future<OidcProviderConfig> fetchOidcConfig(
+      String endpoint, http.Client httpClient) async {
+    final response = await httpClient.get(Uri.parse(endpoint));
 
     var body = jsonDecode(response.body);
 

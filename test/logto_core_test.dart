@@ -1,9 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:nock/nock.dart';
 
 import 'package:logto_dart_sdk/logto_core.dart';
 import 'package:logto_dart_sdk/src/utilities/constants.dart';
 
+import 'mocks/oidc_config.dart';
+
 void main() {
+  setUpAll(nock.init);
+
+  setUp(() {
+    nock.cleanAll();
+  });
+
   test('Generate SignIn Uri', () {
     const String authorizationEndpoint = 'http://foo.com';
     const clientId = 'foo_client';
@@ -50,5 +60,20 @@ void main() {
     expect(signOutUri.queryParameters, containsPair('id_token_hint', idToken));
     expect(signOutUri.queryParameters,
         containsPair('post_logout_redirect_uri', postLogoutRedirectUri));
+  });
+
+  test('Fetch OIDC Config', () async {
+    const String endpoint = '/oidc/.well-known/openid-configuration';
+
+    final interceptor = nock("https://logto.dev").get(endpoint)
+      ..reply(
+        200,
+        mockOidcConfigResponse,
+      );
+
+    var response = await LogtoCore.fetchOidcConfig(
+        "https://logto.dev$endpoint", http.Client());
+    expect(interceptor.isDone, true);
+    expect(response.issuer, 'https://logto.dev/oidc');
   });
 }
