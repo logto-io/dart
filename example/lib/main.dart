@@ -1,4 +1,6 @@
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:logto_dart_sdk/logto_core.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +31,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String content = 'Logto SDK Demo Home Page';
+  var client = http.Client();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+    });
+  }
+
+  void _init() async {
+    LogtoCore.fetchOidcConfig(
+            "https://logto.dev/oidc/.well-known/openid-configuration", client)
+        .then((value) => {
+              setState(() {
+                content = value.toJson().toString();
+              })
+            });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,13 +61,22 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              'Logto SDK Demo Home Page',
-            ),
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(64),
+              child: Text(
+                content,
+              ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    client.close();
+    super.dispose();
   }
 }

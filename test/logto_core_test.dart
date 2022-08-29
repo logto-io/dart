@@ -1,9 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:nock/nock.dart';
 
 import 'package:logto_dart_sdk/logto_core.dart';
 import 'package:logto_dart_sdk/src/utilities/constants.dart';
 
+import 'mocks/oidc_config.dart';
+
 void main() {
+  setUpAll(nock.init);
+
+  setUp(() {
+    nock.cleanAll();
+  });
+
   test('Generate SignIn Uri', () {
     const String authorizationEndpoint = 'http://foo.com';
     const clientId = 'foo_client';
@@ -11,7 +21,7 @@ void main() {
     const String codeChallenge = 'foo_code_challenge';
     const String state = 'foo_state';
 
-    var signInUri = Core.generateSignInUri(
+    var signInUri = LogtoCore.generateSignInUri(
         authorizationEndpoint: authorizationEndpoint,
         clientId: clientId,
         redirectUri: redirectUri,
@@ -26,13 +36,13 @@ void main() {
     expect(signInUri.queryParameters,
         containsPair('code_challenge', codeChallenge));
     expect(signInUri.queryParameters,
-        containsPair('code_challenge_method', Core.codeChallengeMethod));
+        containsPair('code_challenge_method', LogtoCore.codeChallengeMethod));
     expect(signInUri.queryParameters, containsPair('state', state));
     expect(signInUri.queryParameters,
         containsPair('scope', reservedScopes.join(' ')));
     expect(signInUri.queryParameters,
-        containsPair('response_type', Core.responseType));
-    expect(signInUri.queryParameters, containsPair('prompt', Core.prompt));
+        containsPair('response_type', LogtoCore.responseType));
+    expect(signInUri.queryParameters, containsPair('prompt', LogtoCore.prompt));
   });
 
   test('Generate SignOut Uri', () {
@@ -40,7 +50,7 @@ void main() {
     const String idToken = 'foo_id_token';
     const String postLogoutRedirectUri = 'http://foo.app.io';
 
-    var signOutUri = Core.generateSignOutUri(
+    var signOutUri = LogtoCore.generateSignOutUri(
         endSessionEndpoint: endSessionEndpoint,
         idToken: idToken,
         postLogoutRedirectUri: Uri.parse(postLogoutRedirectUri));
@@ -50,5 +60,20 @@ void main() {
     expect(signOutUri.queryParameters, containsPair('id_token_hint', idToken));
     expect(signOutUri.queryParameters,
         containsPair('post_logout_redirect_uri', postLogoutRedirectUri));
+  });
+
+  test('Fetch OIDC Config', () async {
+    const String endpoint = '/oidc/.well-known/openid-configuration';
+
+    final interceptor = nock("https://logto.dev").get(endpoint)
+      ..reply(
+        200,
+        mockOidcConfigResponse,
+      );
+
+    var response = await LogtoCore.fetchOidcConfig(
+        "https://logto.dev$endpoint", http.Client());
+    expect(interceptor.isDone, true);
+    expect(response.issuer, 'https://logto.dev/oidc');
   });
 }
