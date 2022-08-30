@@ -3,7 +3,7 @@ import 'package:nock/nock.dart';
 
 import 'package:example/main.dart';
 
-import '../../test/mocks/oidc_config.dart';
+import '../../test/mocks/responses.dart';
 
 void main() {
   setUpAll(nock.init);
@@ -13,12 +13,10 @@ void main() {
   });
 
   testWidgets('Logto Dart Demo App', (WidgetTester tester) async {
-    final interceptor =
-        nock("https://logto.dev").get("/oidc/.well-known/openid-configuration")
-          ..reply(
-            200,
-            mockOidcConfigResponse,
-          );
+    final interceptor = nock("https://logto.dev")
+        .get("/oidc/.well-known/openid-configuration")
+      ..reply(200, mockOidcConfigResponse,
+          headers: {'Content-Type': 'application/json'});
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());

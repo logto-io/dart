@@ -18,9 +18,17 @@ class OidcProviderConfig {
   final String jwksUri;
   @JsonKey(name: 'issuer', required: true, disallowNullValue: true)
   final String issuer;
+  @JsonKey(name: 'userinfo_endpoint', required: true, disallowNullValue: true)
+  final String userInfoEndpoint;
 
-  OidcProviderConfig(this.authorizationEndpoint, this.endSessionEndpoint,
-      this.issuer, this.jwksUri, this.revocationEndpoint, this.tokenEndpoint);
+  OidcProviderConfig(
+      {required this.authorizationEndpoint,
+      required this.endSessionEndpoint,
+      required this.issuer,
+      required this.jwksUri,
+      required this.revocationEndpoint,
+      required this.tokenEndpoint,
+      required this.userInfoEndpoint});
 
   factory OidcProviderConfig.fromJson(Map<String, dynamic> json) =>
       _$OidcProviderConfigFromJson(json);

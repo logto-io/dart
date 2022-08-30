@@ -15,7 +15,8 @@ OidcProviderConfig _$OidcProviderConfigFromJson(Map<String, dynamic> json) {
       'end_session_endpoint',
       'revocation_endpoint',
       'jwks_uri',
-      'issuer'
+      'issuer',
+      'userinfo_endpoint'
     ],
     disallowNullValues: const [
       'authorization_endpoint',
@@ -23,16 +24,18 @@ OidcProviderConfig _$OidcProviderConfigFromJson(Map<String, dynamic> json) {
       'end_session_endpoint',
       'revocation_endpoint',
       'jwks_uri',
-      'issuer'
+      'issuer',
+      'userinfo_endpoint'
     ],
   );
   return OidcProviderConfig(
-    json['authorization_endpoint'] as String,
-    json['end_session_endpoint'] as String,
-    json['issuer'] as String,
-    json['jwks_uri'] as String,
-    json['revocation_endpoint'] as String,
-    json['token_endpoint'] as String,
+    authorizationEndpoint: json['authorization_endpoint'] as String,
+    endSessionEndpoint: json['end_session_endpoint'] as String,
+    issuer: json['issuer'] as String,
+    jwksUri: json['jwks_uri'] as String,
+    revocationEndpoint: json['revocation_endpoint'] as String,
+    tokenEndpoint: json['token_endpoint'] as String,
+    userInfoEndpoint: json['userinfo_endpoint'] as String,
   );
 }
 
@@ -44,4 +47,5 @@ Map<String, dynamic> _$OidcProviderConfigToJson(OidcProviderConfig instance) =>
       'revocation_endpoint': instance.revocationEndpoint,
       'jwks_uri': instance.jwksUri,
       'issuer': instance.issuer,
+      'userinfo_endpoint': instance.userInfoEndpoint,
     };

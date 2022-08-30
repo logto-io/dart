@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:logto_dart_sdk/logto_core.dart';
+import 'package:logto_dart_sdk/logto_core.dart' as logto_core;
 
 void main() {
   runApp(const MyApp());
@@ -43,8 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _init() async {
-    LogtoCore.fetchOidcConfig(
-            "https://logto.dev/oidc/.well-known/openid-configuration", client)
+    logto_core
+        .fetchOidcConfig(
+            client, "https://logto.dev/oidc/.well-known/openid-configuration")
         .then((value) => {
               setState(() {
                 content = value.toJson().toString();
