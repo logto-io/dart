@@ -48,6 +48,7 @@ class LogtoClient {
     return _oidcConfig!;
   }
 
+  // TODO: add loading to prevent multi click
   Future signIn(
     BuildContext context,
     String redirectUri,
