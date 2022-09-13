@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:logto_dart_sdk/logto_core.dart' as logto_core;
+
+import 'package:logto_dart_sdk/logto_client.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,25 +33,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String content = 'Logto SDK Demo Home Page';
-  var client = http.Client();
+  final client = http.Client();
+  final redirectUri = 'io.logto://callback';
+  final config = const LogtoConfig(
+      appId: 'xgSxW0MDpVqW2GDvCnlNb', endpoint: 'https://logto.dev');
+
+  late LogtoClient logtoClient;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _init();
-    });
+    _init();
   }
 
   void _init() async {
-    logto_core
-        .fetchOidcConfig(
-            client, "https://logto.dev/oidc/.well-known/openid-configuration")
-        .then((value) => {
-              setState(() {
-                content = value.toJson().toString();
-              })
-            });
+    logtoClient = LogtoClient(config, client);
+  }
+
+  void signInCallback() {
+    if (logtoClient.isAuthenticate) {
+      setState(() {
+        var claims = logtoClient.idTokenClaims?.toJson();
+
+        if (claims != null) {
+          content = claims.entries.map((e) => '${e.key}:${e.value}').join("\n");
+        }
+      });
+    }
   }
 
   @override
@@ -68,7 +77,19 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text(
                 content,
               ),
-            )
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.deepPurpleAccent,
+                padding: const EdgeInsets.all(16.0),
+                textStyle: const TextStyle(fontSize: 20),
+              ),
+              onPressed: () {
+                logtoClient.signIn(context, redirectUri, signInCallback);
+              },
+              child: const Text('Sign In'),
+            ),
           ],
         ),
       ),

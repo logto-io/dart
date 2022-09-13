@@ -5,6 +5,7 @@ import '/src/interfaces/logto_interfaces.dart';
 import '/src/utilities/utils.dart';
 import '/src/utilities/http_utils.dart';
 import '/src/utilities/constants.dart';
+import '/src/exceptions/logto_auth_exceptions.dart';
 
 const String _codeChallengeMethod = 'S256';
 const String _responseType = 'code';
@@ -103,21 +104,21 @@ Future<void> revoke({
 Uri generateSignInUri(
     {required String authorizationEndpoint,
     required clientId,
-    required Uri redirectUri,
+    required String redirectUri,
     required String codeChallenge,
     required String state,
-    List<String> scopes = const [],
+    List<String>? scopes,
     List<String>? resources,
     String prompt = _prompt}) {
   var signInUri = Uri.parse(authorizationEndpoint);
 
   Map<String, dynamic> queryParameters = {
     'client_id': clientId,
-    'redirect_uri': redirectUri.toString(),
+    'redirect_uri': redirectUri,
     'code_challenge': codeChallenge,
     'code_challenge_method': _codeChallengeMethod,
     'state': state,
-    'scope': withReservedScopes(scopes).join(' '),
+    'scope': withReservedScopes(scopes ?? []).join(' '),
     'response_type': _responseType,
     'prompt': prompt,
   };
@@ -139,4 +140,36 @@ Uri generateSignOutUri(
     'id_token_hint': idToken,
     'post_logout_redirect_uri': postLogoutRedirectUri.toString()
   });
+}
+
+String verifyAndParseCodeFromCallbackUri(
+    String callbackUri, String redirectUri, String state) {
+  if (!callbackUri.startsWith(redirectUri)) {
+    throw LogtoAuthException(
+        LogtoAuthExceptions.callbackUriValidationError, 'invalid redirect uri');
+  }
+
+  var queryParams = Uri.parse(callbackUri).queryParameters;
+
+  if (queryParams['error'] != null) {
+    throw LogtoAuthException(LogtoAuthExceptions.callbackUriValidationError,
+        queryParams['error']!, queryParams['error_description']);
+  }
+
+  if (queryParams['state'] == null) {
+    throw LogtoAuthException(
+        LogtoAuthExceptions.callbackUriValidationError, 'missing state');
+  }
+
+  if (queryParams['state'] != state) {
+    throw LogtoAuthException(
+        LogtoAuthExceptions.callbackUriValidationError, 'invalid state');
+  }
+
+  if (queryParams['code'] == null) {
+    throw LogtoAuthException(
+        LogtoAuthExceptions.callbackUriValidationError, 'missing code');
+  }
+
+  return queryParams['code']!;
 }

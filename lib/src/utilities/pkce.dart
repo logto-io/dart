@@ -17,7 +17,7 @@ class PKCE {
     return PKCE._(codeVerifier, codeChallenge);
   }
 
-  static String generateCodeVerifier() => utils.generateRandomString(64);
+  static String generateCodeVerifier() => utils.generateRandomString();
 
   static String generateCodeChallenge(String codeVerifier) => base64Url
       .encode(sha256.convert(ascii.encode(codeVerifier)).bytes)
