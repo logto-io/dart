@@ -21,7 +21,7 @@ void main() {
   test('Generate SignIn Uri', () {
     const String authorizationEndpoint = 'http://foo.com';
     const clientId = 'foo_client';
-    var redirectUri = Uri.parse('http://foo.app.io');
+    var redirectUri = 'http://foo.app.io';
     const String codeChallenge = 'foo_code_challenge';
     const String state = 'foo_state';
 
