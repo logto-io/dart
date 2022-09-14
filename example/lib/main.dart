@@ -17,6 +17,11 @@ class MyApp extends StatelessWidget {
       title: 'Flutter SDK Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
       home: const MyHomePage(title: 'Logto SDK Demo Home Page'),
     );
@@ -80,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             TextButton(
               style: TextButton.styleFrom(
-                primary: Colors.white,
                 backgroundColor: Colors.deepPurpleAccent,
                 padding: const EdgeInsets.all(16.0),
                 textStyle: const TextStyle(fontSize: 20),
