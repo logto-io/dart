@@ -1,11 +1,11 @@
 import 'package:http/http.dart' as http;
 import 'package:logto_dart_sdk/src/interfaces/logto_user_info_response.dart';
 
-import '/src/interfaces/logto_interfaces.dart';
-import '/src/utilities/utils.dart';
-import '/src/utilities/http_utils.dart';
-import '/src/utilities/constants.dart';
 import '/src/exceptions/logto_auth_exceptions.dart';
+import '/src/interfaces/logto_interfaces.dart';
+import '/src/utilities/constants.dart';
+import '/src/utilities/http_utils.dart';
+import '/src/utilities/utils.dart';
 
 const String _codeChallengeMethod = 'S256';
 const String _responseType = 'code';
@@ -130,10 +130,11 @@ Uri generateSignInUri(
   return addQueryParameters(signInUri, queryParameters);
 }
 
-Uri generateSignOutUri(
-    {required String endSessionEndpoint,
-    required String idToken,
-    required Uri postLogoutRedirectUri}) {
+Uri generateSignOutUri({
+  required String endSessionEndpoint,
+  required String idToken,
+  required Uri postLogoutRedirectUri,
+}) {
   var signOutUri = Uri.parse(endSessionEndpoint);
 
   return addQueryParameters(signOutUri, {
