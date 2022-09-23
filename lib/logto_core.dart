@@ -133,7 +133,7 @@ Uri generateSignInUri(
 Uri generateSignOutUri({
   required String endSessionEndpoint,
   required String idToken,
-  required Uri postLogoutRedirectUri,
+  Uri? postLogoutRedirectUri,
 }) {
   var signOutUri = Uri.parse(endSessionEndpoint);
 

@@ -5,14 +5,11 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class LogtoWebview extends StatefulWidget {
   final Uri url;
-  final String signInCallbackUri;
-  final Future<void> Function(String callbackUri) signInCallbackHandler;
+  final String? callbackUri;
+  final Future<void> Function(String callbackUri)? callbackHandler;
 
   const LogtoWebview(
-      {Key? key,
-      required this.url,
-      required this.signInCallbackUri,
-      required this.signInCallbackHandler})
+      {Key? key, required this.url, this.callbackUri, this.callbackHandler})
       : super(key: key);
 
   @override
@@ -29,8 +26,9 @@ class _LogtoWebView extends State<LogtoWebview> {
   }
 
   NavigationDecision _interceptNavigation(NavigationRequest request) {
-    if (request.url.startsWith(widget.signInCallbackUri)) {
-      widget.signInCallbackHandler(request.url);
+    if (widget.callbackUri != null &&
+        request.url.startsWith(widget.callbackUri!)) {
+      widget.callbackHandler?.call(request.url);
       Navigator.pop(context);
       return NavigationDecision.prevent;
     }

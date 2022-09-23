@@ -17,11 +17,6 @@ class MyApp extends StatelessWidget {
       title: 'Flutter SDK Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-          ),
-        ),
       ),
       home: const MyHomePage(title: 'Logto SDK Demo Home Page'),
     );
@@ -37,8 +32,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String content = 'Logto SDK Demo Home Page';
-  bool isAuthenticated = false;
+  static String welcome = 'Logto SDK Demo Home Page';
+  String? content;
+  bool? isAuthenticated;
 
   final client = http.Client();
   final redirectUri = 'io.logto://callback';
@@ -60,7 +56,13 @@ class _MyHomePageState extends State<MyHomePage> {
         content = claims!.toJson().toString();
         isAuthenticated = true;
       });
+      return;
     }
+
+    setState(() {
+      content = welcome;
+      isAuthenticated = false;
+    });
   }
 
   void _init() async {
@@ -68,7 +70,11 @@ class _MyHomePageState extends State<MyHomePage> {
     render();
   }
 
-  void signInCallback() {
+  void signInCallback(String callbackUri) {
+    render();
+  }
+
+  void signOutCallback() {
     render();
   }
 
@@ -76,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Widget signInButton = TextButton(
       style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
         backgroundColor: Colors.deepPurpleAccent,
         padding: const EdgeInsets.all(16.0),
         textStyle: const TextStyle(fontSize: 20),
@@ -84,6 +91,19 @@ class _MyHomePageState extends State<MyHomePage> {
         logtoClient.signIn(context, redirectUri, signInCallback);
       },
       child: const Text('Sign In'),
+    );
+
+    Widget signOutButton = TextButton(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.all(16.0),
+        textStyle: const TextStyle(fontSize: 20),
+      ),
+      onPressed: () async {
+        await logtoClient.signOut(context, redirectUri);
+        signOutCallback();
+      },
+      child: const Text('Sign Out'),
     );
 
     return Scaffold(
@@ -97,11 +117,14 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               padding: const EdgeInsets.all(64),
               child: SelectableText(
-                content,
+                content ?? '',
               ),
             ),
-            // TODO: show signout button
-            isAuthenticated ? signInButton : signInButton,
+            isAuthenticated != null
+                ? isAuthenticated == true
+                    ? signOutButton
+                    : signInButton
+                : const SizedBox.shrink()
           ],
         ),
       ),

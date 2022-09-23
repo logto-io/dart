@@ -29,6 +29,7 @@ class LogtoClient {
 
   LogtoClient(this.config, this._httpClient,
       [LogtoStorageStrategy? storageProvider]) {
+    // Init persist token storage
     _tokenStorage = TokenStorage(storageProvider);
   }
 
@@ -47,6 +48,7 @@ class LogtoClient {
   }
 
   Future<OidcProviderConfig> _getOidcConfig() async {
+    // Retrieve OIDC config from the Logto discover URL
     if (_oidcConfig != null) {
       return _oidcConfig!;
     }
@@ -62,7 +64,7 @@ class LogtoClient {
   Future<void> signIn(
     BuildContext context,
     String redirectUri,
-    void Function() signInCallback,
+    void Function(String) signInCallback,
   ) async {
     if (_loading) return;
     _loading = true;
@@ -88,10 +90,14 @@ class LogtoClient {
       MaterialPageRoute(
         builder: (context) => LogtoWebview(
           url: signInUri,
-          signInCallbackUri: redirectUri,
-          signInCallbackHandler: (String callbackUri) async {
+          callbackUri: redirectUri,
+          callbackHandler: (String callbackUri) async {
             await _handleSignInCallback(callbackUri, redirectUri);
-            signInCallback();
+            // remove the consumed auth params from uri
+            var cleanUri = utils.removeQueryParameters(
+                Uri.parse(callbackUri), ['code', 'state']);
+
+            signInCallback(cleanUri.toString());
           },
         ),
       ),
@@ -135,5 +141,57 @@ class LogtoClient {
         idToken: idToken,
         accessToken: tokenResponse.accessToken,
         refreshToken: tokenResponse.refreshToken);
+  }
+
+  Future<void> signOut(BuildContext context,
+      [String? redirectUri,
+      void Function(String)? sigOutCallbackHandler]) async {
+    // Throw error is authentication status not found
+    var idToken = await _tokenStorage.idToken;
+
+    if (idToken == null) {
+      throw LogtoAuthException(
+          LogtoAuthExceptions.authenticationError, 'not authenticated');
+    }
+
+    var oidcConfig = await _getOidcConfig();
+
+    // Revoke refresh token if exist
+    var refreshToken = await _tokenStorage.refreshToken;
+    if (refreshToken != null) {
+      try {
+        await logto_core.revoke(
+            httpClient: _httpClient,
+            revocationEndpoint: oidcConfig.authorizationEndpoint,
+            clientId: config.appId,
+            token: refreshToken);
+      } catch (e) {
+        // Do Nothing silently revoke the token
+      }
+    }
+
+    var postLogoutRedirectUri =
+        redirectUri == null ? null : Uri.parse(redirectUri);
+
+    var signOutUri = logto_core.generateSignOutUri(
+        endSessionEndpoint: oidcConfig.endSessionEndpoint,
+        idToken: idToken.serialization,
+        postLogoutRedirectUri: postLogoutRedirectUri);
+
+    await _tokenStorage.clear();
+
+    // ignore: use_build_context_synchronously
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LogtoWebview(
+          url: signOutUri,
+          callbackUri: redirectUri,
+          callbackHandler: (String callbackUri) async {
+            sigOutCallbackHandler?.call(callbackUri);
+          },
+        ),
+      ),
+    );
   }
 }

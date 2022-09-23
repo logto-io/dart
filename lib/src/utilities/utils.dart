@@ -8,6 +8,10 @@ import 'constants.dart';
 Uri addQueryParameters(Uri url, Map<String, dynamic> parameters) => url.replace(
     queryParameters: Map.from(url.queryParameters)..addAll(parameters));
 
+Uri removeQueryParameters(Uri url, List<String> parameters) => url.replace(
+    queryParameters: Map.fromEntries(url.queryParameters.entries
+        .where((entry) => !parameters.contains(entry.key))));
+
 String generateRandomString([int length = 64]) {
   Random random = Random.secure();
 
