@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     setState(() {
-      content = welcome;
+      content = "";
       isAuthenticated = false;
     });
   }
@@ -114,6 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            SelectableText(welcome,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Container(
               padding: const EdgeInsets.all(64),
               child: SelectableText(
