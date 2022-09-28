@@ -69,12 +69,7 @@ class LogtoClient {
 
   bool _loading = false;
 
-  Future<void> signIn(
-    String redirectUri, {
-    Color? primaryColor,
-    Color? backgroundColor,
-    Widget? title,
-  }) async {
+  Future<void> signIn(String redirectUri) async {
     if (_loading) throw Exception('Already signing in...');
     final httpClient = _httpClient ?? http.Client();
 
@@ -154,9 +149,7 @@ class LogtoClient {
     );
   }
 
-  Future<void> signOut({
-    String? redirectUri,
-  }) async {
+  Future<void> signOut() async {
     // Throw error is authentication status not found
     final idToken = await _tokenStorage.idToken;
 
