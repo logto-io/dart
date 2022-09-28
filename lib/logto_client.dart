@@ -186,25 +186,7 @@ class LogtoClient {
         }
       }
 
-      final postLogoutRedirectUri =
-          redirectUri == null ? null : Uri.parse(redirectUri);
-
-      final signOutUri = logto_core.generateSignOutUri(
-        endSessionEndpoint: oidcConfig.endSessionEndpoint,
-        idToken: idToken.serialization,
-        postLogoutRedirectUri: postLogoutRedirectUri,
-      );
-
       await _tokenStorage.clear();
-
-      if (postLogoutRedirectUri != null) {
-        await FlutterWebAuth.authenticate(
-          url: signOutUri.toString(),
-          callbackUrlScheme: postLogoutRedirectUri.scheme,
-        );
-      } else {
-        await httpClient.get(signOutUri);
-      }
     } finally {
       if (_httpClient == null) {
         httpClient.close();
