@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 
@@ -7,28 +8,37 @@ import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
 import '/src/utilities/constants.dart';
 import '/src/utilities/id_token.dart';
+import '/src/utilities/logto_storage_strategy.dart';
 import '/src/utilities/pkce.dart';
 import '/src/utilities/token_storage.dart';
 import '/src/utilities/utils.dart' as utils;
-import '/src/utilities/webview_provider.dart';
-import '/src/utilities/logto_storage_strategy.dart';
 
 export '/src/interfaces/logto_config.dart';
 
 // Logto SDK
 class LogtoClient {
   final LogtoConfig config;
-  final http.Client _httpClient;
 
   late PKCE _pkce;
   late String _state;
 
   static late TokenStorage _tokenStorage;
 
+  /// Custom [http.Client].
+  ///
+  /// Note that you will have to call `close()` yourself when passing a [http.Client] instance.
+  late final http.Client? _httpClient;
+
+  bool get loading => _loading;
+
   OidcProviderConfig? _oidcConfig;
 
-  LogtoClient(this.config, this._httpClient,
-      [LogtoStorageStrategy? storageProvider]) {
+  LogtoClient({
+    required this.config,
+    LogtoStorageStrategy? storageProvider,
+    http.Client? httpClient,
+  }) {
+    _httpClient = httpClient;
     _tokenStorage = TokenStorage(storageProvider);
   }
 
@@ -37,22 +47,22 @@ class LogtoClient {
   }
 
   Future<String?> get idToken async {
-    var token = await _tokenStorage.idToken;
+    final token = await _tokenStorage.idToken;
     return token?.serialization;
   }
 
   Future<OpenIdClaims?> get idTokenClaims async {
-    var token = await _tokenStorage.idToken;
+    final token = await _tokenStorage.idToken;
     return token?.claims;
   }
 
-  Future<OidcProviderConfig> _getOidcConfig() async {
+  Future<OidcProviderConfig> _getOidcConfig(http.Client httpClient) async {
     if (_oidcConfig != null) {
       return _oidcConfig!;
     }
 
-    var discoveryUri = utils.appendUriPath(config.endpoint, discoveryPath);
-    _oidcConfig = await logto_core.fetchOidcConfig(_httpClient, discoveryUri);
+    final discoveryUri = utils.appendUriPath(config.endpoint, discoveryPath);
+    _oidcConfig = await logto_core.fetchOidcConfig(httpClient, discoveryUri);
 
     return _oidcConfig!;
   }
@@ -60,62 +70,68 @@ class LogtoClient {
   bool _loading = false;
 
   Future<void> signIn(
-    BuildContext context,
-    String redirectUri,
-    void Function() signInCallback,
-  ) async {
-    if (_loading) return;
-    _loading = true;
-    _pkce = PKCE.generate();
-    _state = utils.generateRandomString();
-    _tokenStorage.setIdToken(null);
+    String redirectUri, {
+    Color? primaryColor,
+    Color? backgroundColor,
+    Widget? title,
+  }) async {
+    if (_loading) throw Exception('Already signing in...');
+    final httpClient = _httpClient ?? http.Client();
 
-    var oidcConfig = await _getOidcConfig();
+    try {
+      _loading = true;
+      _pkce = PKCE.generate();
+      _state = utils.generateRandomString();
+      _tokenStorage.setIdToken(null);
+      final oidcConfig = await _getOidcConfig(httpClient);
 
-    var signInUri = logto_core.generateSignInUri(
-      authorizationEndpoint: oidcConfig.authorizationEndpoint,
-      clientId: config.appId,
-      redirectUri: redirectUri,
-      codeChallenge: _pkce.codeChallenge,
-      state: _state,
-      resources: config.resources,
-      scopes: config.scopes,
-    );
+      final signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: oidcConfig.authorizationEndpoint,
+        clientId: config.appId,
+        redirectUri: redirectUri,
+        codeChallenge: _pkce.codeChallenge,
+        state: _state,
+        resources: config.resources,
+        scopes: config.scopes,
+      );
+      String? callbackUri;
 
-    // ignore: use_build_context_synchronously
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LogtoWebview(
-          url: signInUri,
-          signInCallbackUri: redirectUri,
-          signInCallbackHandler: (String callbackUri) async {
-            await _handleSignInCallback(callbackUri, redirectUri);
-            signInCallback();
-          },
-        ),
-      ),
-    );
-    _loading = false;
+      final redirectUriScheme = Uri.parse(redirectUri).scheme;
+      callbackUri = await FlutterWebAuth.authenticate(
+        url: signInUri.toString(),
+        callbackUrlScheme: redirectUriScheme,
+        preferEphemeral: true,
+      );
+
+      await _handleSignInCallback(callbackUri, redirectUri, httpClient);
+    } finally {
+      _loading = false;
+      if (_httpClient == null) httpClient.close();
+    }
   }
 
-  Future _handleSignInCallback(String callbackUri, String redirectUri) async {
-    var code = logto_core.verifyAndParseCodeFromCallbackUri(
-        callbackUri, redirectUri, _state);
+  Future _handleSignInCallback(
+      String callbackUri, String redirectUri, http.Client httpClient) async {
+    final code = logto_core.verifyAndParseCodeFromCallbackUri(
+      callbackUri,
+      redirectUri,
+      _state,
+    );
 
-    var oidcConfig = await _getOidcConfig();
+    final oidcConfig = await _getOidcConfig(httpClient);
 
-    var tokenResponse = await logto_core.fetchTokenByAuthorizationCode(
-        httpClient: _httpClient,
-        tokenEndPoint: oidcConfig.tokenEndpoint,
-        code: code,
-        codeVerifier: _pkce.codeVerifier,
-        clientId: config.appId,
-        redirectUri: redirectUri);
+    final tokenResponse = await logto_core.fetchTokenByAuthorizationCode(
+      httpClient: httpClient,
+      tokenEndPoint: oidcConfig.tokenEndpoint,
+      code: code,
+      codeVerifier: _pkce.codeVerifier,
+      clientId: config.appId,
+      redirectUri: redirectUri,
+    );
 
-    var idToken = IdToken.unverified(tokenResponse.idToken);
+    final idToken = IdToken.unverified(tokenResponse.idToken);
 
-    var keyStore = JsonWebKeyStore()
+    final keyStore = JsonWebKeyStore()
       ..addKeySetUrl(Uri.parse(oidcConfig.jwksUri));
 
     if (!await idToken.verify(keyStore)) {
@@ -123,7 +139,7 @@ class LogtoClient {
           LogtoAuthExceptions.idTokenValidationError, 'invalid jws signature');
     }
 
-    var violations = idToken.claims
+    final violations = idToken.claims
         .validate(issuer: Uri.parse(oidcConfig.issuer), clientId: config.appId);
 
     if (violations.isNotEmpty) {
@@ -132,8 +148,67 @@ class LogtoClient {
     }
 
     await _tokenStorage.save(
-        idToken: idToken,
-        accessToken: tokenResponse.accessToken,
-        refreshToken: tokenResponse.refreshToken);
+      idToken: idToken,
+      accessToken: tokenResponse.accessToken,
+      refreshToken: tokenResponse.refreshToken,
+    );
+  }
+
+  Future<void> signOut({
+    String? redirectUri,
+  }) async {
+    // Throw error is authentication status not found
+    final idToken = await _tokenStorage.idToken;
+
+    final httpClient = _httpClient ?? http.Client();
+
+    if (idToken == null) {
+      throw LogtoAuthException(
+          LogtoAuthExceptions.authenticationError, 'not authenticated');
+    }
+
+    try {
+      final oidcConfig = await _getOidcConfig(httpClient);
+
+      // Revoke refresh token if exist
+      final refreshToken = await _tokenStorage.refreshToken;
+
+      if (refreshToken != null) {
+        try {
+          await logto_core.revoke(
+            httpClient: httpClient,
+            revocationEndpoint: oidcConfig.authorizationEndpoint,
+            clientId: config.appId,
+            token: refreshToken,
+          );
+        } catch (e) {
+          // Do Nothing silently revoke the token
+        }
+      }
+
+      final postLogoutRedirectUri =
+          redirectUri == null ? null : Uri.parse(redirectUri);
+
+      final signOutUri = logto_core.generateSignOutUri(
+        endSessionEndpoint: oidcConfig.endSessionEndpoint,
+        idToken: idToken.serialization,
+        postLogoutRedirectUri: postLogoutRedirectUri,
+      );
+
+      await _tokenStorage.clear();
+
+      if (postLogoutRedirectUri != null) {
+        await FlutterWebAuth.authenticate(
+          url: signOutUri.toString(),
+          callbackUrlScheme: postLogoutRedirectUri.scheme,
+        );
+      } else {
+        await httpClient.get(signOutUri);
+      }
+    } finally {
+      if (_httpClient == null) {
+        httpClient.close();
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:logto_dart_sdk/logto_dart_sdk.dart';
+import 'package:http/http.dart' as http;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +37,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String content = 'Logto SDK Demo Home Page';
-  bool isAuthenticated = false;
+  static String welcome = 'Logto SDK Demo Home Page';
+  String? content;
+  bool? isAuthenticated;
 
-  final client = http.Client();
   final redirectUri = 'io.logto://callback';
   final config = const LogtoConfig(
       appId: 'xgSxW0MDpVqW2GDvCnlNb', endpoint: 'https://logto.dev');
@@ -60,15 +60,19 @@ class _MyHomePageState extends State<MyHomePage> {
         content = claims!.toJson().toString();
         isAuthenticated = true;
       });
+      return;
     }
+    setState(() {
+      content = '';
+      isAuthenticated = false;
+    });
   }
 
   void _init() async {
-    logtoClient = LogtoClient(config, client);
-    render();
-  }
-
-  void signInCallback() {
+    logtoClient = LogtoClient(
+      config: config,
+      httpClient: http.Client(),
+    );
     render();
   }
 
@@ -76,14 +80,29 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Widget signInButton = TextButton(
       style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
         backgroundColor: Colors.deepPurpleAccent,
         padding: const EdgeInsets.all(16.0),
         textStyle: const TextStyle(fontSize: 20),
       ),
-      onPressed: () {
-        logtoClient.signIn(context, redirectUri, signInCallback);
+      onPressed: () async {
+        await logtoClient.signIn(redirectUri);
+        render();
       },
       child: const Text('Sign In'),
+    );
+
+    Widget signOutButton = TextButton(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.all(16.0),
+        textStyle: const TextStyle(fontSize: 20),
+      ),
+      onPressed: () async {
+        await logtoClient.signOut(redirectUri: redirectUri);
+        render();
+      },
+      child: const Text('Sign Out'),
     );
 
     return Scaffold(
@@ -94,23 +113,23 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            SelectableText(welcome,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Container(
               padding: const EdgeInsets.all(64),
               child: SelectableText(
-                content,
+                content ?? '',
               ),
             ),
-            // TODO: show signout button
-            isAuthenticated ? signInButton : signInButton,
+            isAuthenticated != null
+                ? isAuthenticated == true
+                    ? signOutButton
+                    : signInButton
+                : const SizedBox.shrink()
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    client.close();
-    super.dispose();
   }
 }
