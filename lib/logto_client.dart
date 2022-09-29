@@ -3,13 +3,13 @@ import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 
-import '/logto_core.dart' as logto_core;
+import 'logto_core.dart' as logto_core;
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
-import 'src/modules/id_token.dart';
-import 'src/modules/logto_storage_strategy.dart';
-import 'src/modules/pkce.dart';
-import 'src/modules/token_storage.dart';
+import '/src/modules/id_token.dart';
+import '/src/modules/logto_storage_strategy.dart';
+import '/src/modules/pkce.dart';
+import '/src/modules/token_storage.dart';
 
 import '/src/utilities/constants.dart';
 import '/src/utilities/utils.dart' as utils;
