@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logto_dart_sdk/src/utilities/id_token.dart';
-import 'package:logto_dart_sdk/src/utilities/logto_storage_strategy.dart';
-import 'package:logto_dart_sdk/src/utilities/token_storage.dart';
+import 'package:logto_dart_sdk/src/modules/id_token.dart';
+import 'package:logto_dart_sdk/src/modules/logto_storage_strategy.dart';
+import 'package:logto_dart_sdk/src/modules/token_storage.dart';
 
 import '../mocks/mock_storage.dart';
 
@@ -16,6 +18,9 @@ void main() {
     late TokenStorage sut;
     const refreshToken = 'refresh_token';
     const accessToken = 'access_token';
+    const resource = '/api/foo';
+    const scope = 'profile email';
+
     final idToken = IdToken.unverified(
         'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkNza2w2SDRGR3NpLXE0QkVPT1BQOWJlbHNoRGFHZjd3RXViVU5KQllwQmsifQ.eyJzdWIiOiJzV0FWNG96MHhnN1giLCJuYW1lIjoiSnVsaWFuIEhhcnRsIiwicGljdHVyZSI6Imh0dHBzOi8vYXZhdGFycy5naXRodWJ1c2VyY29udGVudC5jb20vdS85MDc5OTU2Mz92PTQiLCJ1c2VybmFtZSI6bnVsbCwicm9sZV9uYW1lcyI6W10sImF0X2hhc2giOiI4Und3Y051UFlwcHRwWUx5MjctaEFBIiwiYXVkIjoieGdTeFcwTURwVnFXMkdEdkNubE5iIiwiZXhwIjoxNjYzNTEzNDU3LCJpYXQiOjE2NjM1MDk4NTcsImlzcyI6Imh0dHBzOi8vbG9ndG8uZGV2L29pZGMifQ.U3Yn3P7Vk32lpEXjNTV9NKT9PBqM1JT8sn8jdmu0MIHLhJtdUZUxGFuiPYRDDqw7EKIsmr23VXNeKELsw7Xd7mRBTWYPLGQKDOzorVyiLmdVLuxEQYTJSEsI2qs51GZyFqYgaQHczxmOaqYKnr83RGifoNkjgBXYdIozVmAy3V67ddnHfstv7TN-f2-AgQ90zoa00RF_5HbD60_Hhl8RdDz92Y_wJ3dD5PeUp33rGpP319txxdU1DYk44cpH5AxbICunigx5dqZMYnD3Xy1B4jY5BNI6WBNMnFeDbmEQmNg9CijVAvqRN9JBzOpIEXbiznz-tb0RLOngrU3XitvAfR7NsF9YHnqp8XQrQ9itF6sI6fgALDL4FLlAOM58tlHk5M95F4G28H6KvM27n1I5TtFlUzMx1C6mR721wLbAE3l6HZoSU9heWz1liCdk_yNswhJSkFRk9rH1daieeRC_AH_6w3ufBXZ_rTOA9ziuba7C0mizp4SGQxXu57CGO8P80rkUVl-A6Z9_2IQNLfK6khlandYIwNSmpdt4OQn7DZp5eI7yXm2IIpouE304q27rgXl3wpcfHDilxniIGqKs7O-zO6uFNfZljCpvP2ZJNxzuCxizJ3eyGOqDsrLVnIONqrjpiYk2TO1MAdpzZpwKwKm2BRH3fpkDaoplwCPmqDs');
     late LogtoStorageStrategy storageStrategy;
@@ -29,14 +34,38 @@ void main() {
       await sut.clear();
     });
     test('should set access token locally and persist it', () async {
-      await sut.setAccessToken(accessToken);
+      await sut.setAccessToken(accessToken,
+          resource: resource, scopes: scope.split(' '), expiresIn: 1);
 
-      expect(await sut.accessToken, equals(accessToken));
+      final nullToken = await sut.getAccessToken();
+      expect(nullToken, isNull);
+
+      final tokenStorage = await sut.getAccessToken(resource, scope.split(' '));
+
+      expect(tokenStorage?.token, accessToken);
+      // scope should be sorted
+      expect(tokenStorage?.scope, equals('email profile'));
+      expect(tokenStorage?.expiresAt, isNotNull);
 
       final persistedStorageAccessToken =
           await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey);
 
-      expect(persistedStorageAccessToken, accessToken);
+      final tokenMap = jsonDecode(persistedStorageAccessToken ?? '{}');
+      final Map<String, dynamic> token = tokenMap['email profile@/api/foo'];
+
+      expect(token['token'], tokenStorage?.token);
+      expect(token['scope'], tokenStorage?.scope);
+      expect(token['expiresAt'],
+          equals(tokenStorage?.expiresAt.toIso8601String()));
+    });
+
+    test('access token should expires properly', () async {
+      await sut.setAccessToken(accessToken, expiresIn: 1);
+
+      await Future.delayed(const Duration(seconds: 2), () async {
+        final token = await sut.getAccessToken();
+        expect(token?.isExpired, true);
+      });
     });
 
     test('should set refresh token locally and persist it', () async {
@@ -61,12 +90,17 @@ void main() {
 
     test('save method should persist current state of token storage', () async {
       await sut.save(
-          idToken: idToken,
-          accessToken: accessToken,
-          refreshToken: refreshToken);
+        idToken: idToken,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresIn: 1,
+      );
 
-      expect(await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey),
-          accessToken);
+      final accessTokenStorage = await sut.getAccessToken();
+
+      expect(accessTokenStorage?.token, accessToken);
+      expect(accessTokenStorage?.scope, '');
+
       expect(await storageStrategy.read(key: _TokenStorageKeys.refreshTokenKey),
           refreshToken);
       expect(await storageStrategy.read(key: _TokenStorageKeys.idTokenKey),
@@ -77,9 +111,14 @@ void main() {
       await sut.save(
           idToken: idToken,
           accessToken: accessToken,
-          refreshToken: refreshToken);
+          refreshToken: refreshToken,
+          expiresIn: 1);
 
       await sut.clear();
+
+      expect(await sut.getAccessToken(resource, scope.split(' ')), null);
+      expect(await sut.refreshToken, null);
+      expect(await sut.idToken, null);
 
       expect(await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey),
           null);
@@ -87,15 +126,6 @@ void main() {
           null);
       expect(
           await storageStrategy.read(key: _TokenStorageKeys.idTokenKey), null);
-    });
-
-    test('clear method should delete in memory state', () async {
-      await sut.save();
-      await sut.clear();
-
-      expect(await sut.accessToken, null);
-      expect(await sut.refreshToken, null);
-      expect(await sut.idToken, null);
     });
   });
 }
