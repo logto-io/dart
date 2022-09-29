@@ -1,4 +1,4 @@
-import 'package:logto_dart_sdk/src/utilities/logto_storage_strategy.dart';
+import 'package:logto_dart_sdk/src/modules/logto_storage_strategy.dart';
 
 class MockStorageStrategy implements LogtoStorageStrategy {
   final Map<String, String?> _storage = {};

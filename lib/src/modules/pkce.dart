@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import 'utils.dart' as utils;
+import '/src/utilities/utils.dart' as utils;
 
 class PKCE {
   final String codeVerifier;

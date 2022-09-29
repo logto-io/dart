@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:logto_dart_sdk/src/utilities/pkce.dart';
+import 'package:logto_dart_sdk/src/modules/pkce.dart';
 
 void main() {
   test(' Generate PKCE pair', () {
