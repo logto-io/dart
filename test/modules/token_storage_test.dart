@@ -59,12 +59,19 @@ void main() {
           equals(tokenStorage?.expiresAt.toIso8601String()));
     });
 
-    test('access token should expires properly', () async {
-      await sut.setAccessToken(accessToken, expiresIn: 1);
+    test('should remove the expired access token and return null', () async {
+      await sut.setAccessToken(accessToken,
+          resource: resource, scopes: scope.split(' '), expiresIn: 1);
+
+      final tokenStorage = await sut.getAccessToken(resource, scope.split(' '));
+      expect(tokenStorage?.token, accessToken);
 
       await Future.delayed(const Duration(seconds: 2), () async {
-        final token = await sut.getAccessToken();
-        expect(token?.isExpired, true);
+        final token = await sut.getAccessToken(resource, scope.split(' '));
+        expect(token, isNull);
+        expect(
+            await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey),
+            isNull);
       });
     });
 
