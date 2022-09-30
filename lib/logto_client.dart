@@ -2,16 +2,15 @@ import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 
-import 'logto_core.dart' as logto_core;
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
 import '/src/modules/id_token.dart';
 import '/src/modules/logto_storage_strategy.dart';
 import '/src/modules/pkce.dart';
 import '/src/modules/token_storage.dart';
-
 import '/src/utilities/constants.dart';
 import '/src/utilities/utils.dart' as utils;
+import 'logto_core.dart' as logto_core;
 
 export '/src/interfaces/logto_config.dart';
 
@@ -65,6 +64,11 @@ class LogtoClient {
     _oidcConfig = await logto_core.fetchOidcConfig(httpClient, discoveryUri);
 
     return _oidcConfig!;
+  }
+
+  Future<AccessToken?> getAccessToken(
+      {List<String>? scopes, String? resource}) async {
+    return await _tokenStorage.getAccessToken(resource, scopes);
   }
 
   bool _loading = false;
