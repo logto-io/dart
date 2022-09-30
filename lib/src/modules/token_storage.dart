@@ -93,7 +93,7 @@ class TokenStorage {
 
     // remove the access token if expired and return null
     if (accessToken?.isExpired == true) {
-      _deleteAccessToken(key);
+      await _deleteAccessToken(key);
       return null;
     }
 
