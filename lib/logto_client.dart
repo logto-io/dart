@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
@@ -70,12 +69,7 @@ class LogtoClient {
 
   bool _loading = false;
 
-  Future<void> signIn(
-    String redirectUri, {
-    Color? primaryColor,
-    Color? backgroundColor,
-    Widget? title,
-  }) async {
+  Future<void> signIn(String redirectUri) async {
     if (_loading) throw Exception('Already signing in...');
     final httpClient = _httpClient ?? http.Client();
 
@@ -155,9 +149,7 @@ class LogtoClient {
         expiresIn: tokenResponse.expiresIn);
   }
 
-  Future<void> signOut({
-    String? redirectUri,
-  }) async {
+  Future<void> signOut() async {
     // Throw error is authentication status not found
     final idToken = await _tokenStorage.idToken;
 
@@ -187,25 +179,7 @@ class LogtoClient {
         }
       }
 
-      final postLogoutRedirectUri =
-          redirectUri == null ? null : Uri.parse(redirectUri);
-
-      final signOutUri = logto_core.generateSignOutUri(
-        endSessionEndpoint: oidcConfig.endSessionEndpoint,
-        idToken: idToken.serialization,
-        postLogoutRedirectUri: postLogoutRedirectUri,
-      );
-
       await _tokenStorage.clear();
-
-      if (postLogoutRedirectUri != null) {
-        await FlutterWebAuth.authenticate(
-          url: signOutUri.toString(),
-          callbackUrlScheme: postLogoutRedirectUri.scheme,
-        );
-      } else {
-        await httpClient.get(signOutUri);
-      }
     } finally {
       if (_httpClient == null) {
         httpClient.close();
