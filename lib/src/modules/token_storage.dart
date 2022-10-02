@@ -53,16 +53,15 @@ class TokenStorage {
   }
 
   Future<void> setIdToken(IdToken? idToken) async {
-    _idToken = idToken;
-
     await _storage.write(
       key: _TokenStorageKeys.idTokenKey,
       value: _encodeIdToken(idToken),
     );
+
+    _idToken = idToken;
   }
 
-  static String _buildAccessTokenKey(String? resource,
-          [List<String>? scopes]) =>
+  static String buildAccessTokenKey(String? resource, [List<String>? scopes]) =>
       "${_encodeScopes(scopes)}@${resource ?? ''}";
 
   Future<Map<String, AccessToken>?> _getAccessTokenMapFromStorage() async {
@@ -85,7 +84,7 @@ class TokenStorage {
 
   Future<AccessToken?> getAccessToken(
       [String? resource, List<String>? scopes]) async {
-    final key = _buildAccessTokenKey(resource, scopes);
+    final key = buildAccessTokenKey(resource, scopes);
 
     _accessTokenMap ??= await _getAccessTokenMapFromStorage();
 
@@ -130,17 +129,20 @@ class TokenStorage {
 
   Future<void> setAccessToken(String accessToken,
       {String? resource, List<String>? scopes, required int expiresIn}) async {
-    final key = _buildAccessTokenKey(resource, scopes);
+    final key = buildAccessTokenKey(resource, scopes);
+
+    // load current accessTokenMap
+    final currentAccessTokenMap =
+        _accessTokenMap ?? await _getAccessTokenMapFromStorage() ?? {};
 
     final Map<String, AccessToken> newAccessTokenMap =
-        Map.from(_accessTokenMap ?? {});
+        Map.from(currentAccessTokenMap);
 
     newAccessTokenMap.addAll({
       key: AccessToken(
           token: accessToken,
           scope: _encodeScopes(scopes),
-
-          /// convert the expireAt to standard utc time
+          // convert the expireAt to standard utc time
           expiresAt: DateTime.now().add(Duration(seconds: expiresIn)).toUtc())
     });
 
@@ -160,12 +162,12 @@ class TokenStorage {
   }
 
   Future<void> setRefreshToken(String? refreshToken) async {
-    _refreshToken = refreshToken;
-
     await _storage.write(
       key: _TokenStorageKeys.refreshTokenKey,
       value: refreshToken,
     );
+
+    _refreshToken = refreshToken;
   }
 
   /// Initial token response saving
