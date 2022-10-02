@@ -101,14 +101,16 @@ class TokenStorage {
   }
 
   Future<void> _deleteAccessToken(String accessTokenKey) async {
-    final tempAccessTokenMap = _accessTokenMap;
-    final value = tempAccessTokenMap?.remove(accessTokenKey);
+    final Map<String, AccessToken> tempAccessTokenMap =
+        Map.from(_accessTokenMap ?? {});
+
+    final value = tempAccessTokenMap.remove(accessTokenKey);
 
     // Do not update the storage if target accessToken does not exist
     if (value == null) return;
 
     // clean up the storage if is empty
-    if (tempAccessTokenMap == null || tempAccessTokenMap.isEmpty) {
+    if (tempAccessTokenMap.isEmpty) {
       await _storage.delete(key: _TokenStorageKeys.accessTokenKey);
       _accessTokenMap = null;
       return;
