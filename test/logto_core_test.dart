@@ -30,6 +30,7 @@ void main() {
         clientId: clientId,
         redirectUri: redirectUri,
         codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
         state: state);
 
     expect(signInUri.scheme, 'http');
@@ -37,6 +38,8 @@ void main() {
     expect(signInUri.queryParameters, containsPair('client_id', clientId));
     expect(signInUri.queryParameters,
         containsPair('redirect_uri', 'http://foo.app.io'));
+    expect(
+        signInUri.queryParameters, containsPair('resource', 'http://foo.api'));
     expect(signInUri.queryParameters,
         containsPair('code_challenge', codeChallenge));
     expect(signInUri.queryParameters,

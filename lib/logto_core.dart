@@ -124,7 +124,7 @@ Uri generateSignInUri(
   };
 
   if (resources != null && resources.isNotEmpty) {
-    queryParameters.addAll({'resources': resources});
+    queryParameters.addAll({'resource': resources});
   }
 
   return addQueryParameters(signInUri, queryParameters);
