@@ -87,13 +87,37 @@ class TokenStorage {
       [String? resource, List<String>? scopes]) async {
     final key = _buildAccessTokenKey(resource, scopes);
 
-    if (_accessTokenMap != null) {
-      return _accessTokenMap![key];
+    _accessTokenMap ??= await _getAccessTokenMapFromStorage();
+
+    final accessToken = _accessTokenMap?[key];
+
+    // remove the access token if expired and return null
+    if (accessToken?.isExpired == true) {
+      await _deleteAccessToken(key);
+      return null;
     }
 
-    _accessTokenMap = await _getAccessTokenMapFromStorage();
+    return accessToken;
+  }
 
-    return _accessTokenMap?[key];
+  Future<void> _deleteAccessToken(String accessTokenKey) async {
+    final Map<String, AccessToken> tempAccessTokenMap =
+        Map.from(_accessTokenMap ?? {});
+
+    final value = tempAccessTokenMap.remove(accessTokenKey);
+
+    // Do not update the storage if target accessToken does not exist
+    if (value == null) return;
+
+    // clean up the storage if is empty
+    if (tempAccessTokenMap.isEmpty) {
+      await _storage.delete(key: _TokenStorageKeys.accessTokenKey);
+      _accessTokenMap = null;
+      return;
+    }
+
+    await _saveAccessTokenMapToStorage(tempAccessTokenMap);
+    _accessTokenMap = tempAccessTokenMap;
   }
 
   Future<void> _saveAccessTokenMapToStorage(
