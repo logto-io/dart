@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:logto_dart_sdk/logto_dart_sdk.dart';
+import 'package:logto_dart_sdk/logto_client.dart';
 import 'package:http/http.dart' as http;
 
 void main() async {
