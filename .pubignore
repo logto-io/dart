@@ -1,0 +1,39 @@
+# Miscellaneous
+
+_.class
+_.log
+_.pyc
+_.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+
+_.iml
+_.ipr
+\*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+
+# VS Code which you may wish to be included in version control, so this line
+
+# is commented out by default.
+
+#.vscode/
+
+# Flutter/Dart/Pub related
+
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+
+/pubspec.lock \*_/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/_
