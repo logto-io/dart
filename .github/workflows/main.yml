@@ -53,3 +53,9 @@ jobs:
       - name: Test
         working-directory: ./example
         run: flutter test --no-pub --coverage
+
+      - name: Codecov Dart SDK
+        uses: codecov/codecov-action@v2
+        with:
+          flags: Dart-sdk
+          directory: ./lib
