@@ -11,7 +11,7 @@ dependencies:
   crypto: ^3.0.2
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^6.0.0
+  flutter_secure_storage: ^7.0.0
   http: ^0.13.5
   jose: ^0.3.2
   json_annotation: ^4.6.0
