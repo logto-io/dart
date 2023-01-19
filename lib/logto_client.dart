@@ -23,12 +23,6 @@ class LogtoClient {
 
   static late TokenStorage _tokenStorage;
 
-  /// Logto automatically enables refresh token's rotation
-  ///
-  /// Simultaneous access token request may be problematic
-  /// Use a request cache map to avoid the race condition
-  static final Map<String, Future<AccessToken?>> _accessTokenRequestCache = {};
-
   /// Custom [http.Client].
   ///
   /// Note that you will have to call `close()` yourself when passing a [http.Client] instance.
@@ -81,21 +75,7 @@ class LogtoClient {
       return accessToken;
     }
 
-    // If no valid access token is found in storage, use refresh token to claim a new one
-    final cacheKey = TokenStorage.buildAccessTokenKey(resource);
-
-    // Reuse the cached request if is exist
-    if (_accessTokenRequestCache[cacheKey] != null) {
-      return _accessTokenRequestCache[cacheKey];
-    }
-
-    // Create new token request and add it to cache
-    final newTokenRequest = _getAccessTokenByRefreshToken(resource);
-    _accessTokenRequestCache[cacheKey] = newTokenRequest;
-
-    final token = await newTokenRequest;
-    // Clear the cache after response
-    _accessTokenRequestCache.remove(cacheKey);
+    final token = await _getAccessTokenByRefreshToken(resource);
 
     return token;
   }
