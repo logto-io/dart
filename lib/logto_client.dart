@@ -119,9 +119,7 @@ class LogtoClient {
           tokenEndPoint: oidcConfig.tokenEndpoint,
           clientId: config.appId,
           refreshToken: refreshToken,
-          resource: resource,
-          // RBAC are not supported currently, no resource specific scopes are needed
-          scopes: resource != null ? ['offline_access'] : null);
+          resource: resource);
 
       final scopes = response.scope.split(' ');
 
