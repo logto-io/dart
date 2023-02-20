@@ -7,7 +7,6 @@ abstract class UserInfo implements JsonObject {
   String? get name => this['name'];
   String? get username => this['username'];
   String? get avatar => this['avatar'];
-  List<String>? get roleNames => this['role_names'];
 
   factory UserInfo.fromJson(Map<String, dynamic> json) = _UserInfoImpl.fromJson;
 }
