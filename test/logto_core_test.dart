@@ -53,17 +53,17 @@ void main() {
 
   test('Generate SignOut Uri', () {
     const String endSessionEndpoint = 'https://foo.com';
-    const String idToken = 'foo_id_token';
+    const String clientId = 'foo_client';
     const String postLogoutRedirectUri = 'http://foo.app.io';
 
     var signOutUri = logto_core.generateSignOutUri(
         endSessionEndpoint: endSessionEndpoint,
-        idToken: idToken,
+        clientId: clientId,
         postLogoutRedirectUri: Uri.parse(postLogoutRedirectUri));
 
     expect(signOutUri.scheme, 'https');
     expect(signOutUri.host, 'foo.com');
-    expect(signOutUri.queryParameters, containsPair('id_token_hint', idToken));
+    expect(signOutUri.queryParameters, containsPair('client_id', clientId));
     expect(signOutUri.queryParameters,
         containsPair('post_logout_redirect_uri', postLogoutRedirectUri));
   });
