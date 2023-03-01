@@ -132,13 +132,13 @@ Uri generateSignInUri(
 
 Uri generateSignOutUri({
   required String endSessionEndpoint,
-  required String idToken,
+  required String clientId,
   Uri? postLogoutRedirectUri,
 }) {
   var signOutUri = Uri.parse(endSessionEndpoint);
 
   return addQueryParameters(signOutUri, {
-    'id_token_hint': idToken,
+    'client_id': clientId,
     'post_logout_redirect_uri': postLogoutRedirectUri?.toString()
   });
 }
