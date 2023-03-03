@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logto_dart_sdk/logto_client.dart';
 import 'package:http/http.dart' as http;
+import 'package:logto_dart_sdk/logto_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

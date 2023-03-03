@@ -12,6 +12,7 @@ import '/src/modules/token_storage.dart';
 import '/src/utilities/constants.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
+import 'logto_core.dart';
 
 export '/src/interfaces/logto_config.dart';
 
@@ -148,7 +149,8 @@ class LogtoClient {
     }
   }
 
-  Future<void> signIn(String redirectUri) async {
+  Future<void> signIn(String redirectUri,
+      [InteractionMode? interactionMode]) async {
     if (_loading) {
       throw LogtoAuthException(
           LogtoAuthExceptions.isLoadingError, 'Already signing in...');
@@ -171,6 +173,7 @@ class LogtoClient {
         state: _state,
         resources: config.resources,
         scopes: config.scopes,
+        interactionMode: interactionMode,
       );
       String? callbackUri;
 

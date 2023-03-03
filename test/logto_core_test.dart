@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:logto_dart_sdk/logto_core.dart';
 import 'package:nock/nock.dart';
 
 import 'package:logto_dart_sdk/logto_core.dart' as logto_core;
@@ -24,6 +25,7 @@ void main() {
     var redirectUri = 'http://foo.app.io';
     const String codeChallenge = 'foo_code_challenge';
     const String state = 'foo_state';
+    const InteractionMode interactionMode = InteractionMode.signUp;
 
     var signInUri = logto_core.generateSignInUri(
         authorizationEndpoint: authorizationEndpoint,
@@ -31,7 +33,8 @@ void main() {
         redirectUri: redirectUri,
         codeChallenge: codeChallenge,
         resources: ['http://foo.api'],
-        state: state);
+        state: state,
+        interactionMode: interactionMode);
 
     expect(signInUri.scheme, 'http');
     expect(signInUri.host, 'foo.com');
@@ -49,6 +52,8 @@ void main() {
         containsPair('scope', reservedScopes.join(' ')));
     expect(signInUri.queryParameters, containsPair('response_type', 'code'));
     expect(signInUri.queryParameters, containsPair('prompt', 'consent'));
+    expect(
+        signInUri.queryParameters, containsPair('interaction_mode', 'signUp'));
   });
 
   test('Generate SignOut Uri', () {

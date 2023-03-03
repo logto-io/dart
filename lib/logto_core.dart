@@ -12,6 +12,21 @@ const String _responseType = 'code';
 const String _prompt = 'consent';
 const String _requestContentType = 'application/x-www-form-urlencoded';
 
+enum InteractionMode { signIn, signUp }
+
+extension InteractionModeExtension on InteractionMode {
+  String get value {
+    switch (this) {
+      case InteractionMode.signIn:
+        return 'signIn';
+      case InteractionMode.signUp:
+        return 'signUp';
+      default:
+        throw Exception("Invalid value");
+    }
+  }
+}
+
 Future<OidcProviderConfig> fetchOidcConfig(
     http.Client httpClient, String endpoint) async {
   final response = await httpClient.get(Uri.parse(endpoint));
@@ -109,6 +124,7 @@ Uri generateSignInUri(
     required String state,
     List<String>? scopes,
     List<String>? resources,
+    InteractionMode? interactionMode,
     String prompt = _prompt}) {
   var signInUri = Uri.parse(authorizationEndpoint);
 
@@ -125,6 +141,11 @@ Uri generateSignInUri(
 
   if (resources != null && resources.isNotEmpty) {
     queryParameters.addAll({'resource': resources});
+  }
+
+  if (interactionMode != null) {
+    // need to align with the backend OIDC params name
+    queryParameters.addAll({'interaction_mode': interactionMode.value});
   }
 
   return addQueryParameters(signInUri, queryParameters);
