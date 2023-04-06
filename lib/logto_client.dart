@@ -70,23 +70,20 @@ class LogtoClient {
     return _oidcConfig!;
   }
 
-  Future<AccessToken?> getAccessToken(
-      {String? resource, List<String>? scopes}) async {
+  Future<AccessToken?> getAccessToken({String? resource}) async {
     final accessToken = await _tokenStorage.getAccessToken(resource);
 
     if (accessToken != null) {
       return accessToken;
     }
 
-    final token =
-        await _getAccessTokenByRefreshToken(resource: resource, scopes: scopes);
+    final token = await _getAccessTokenByRefreshToken(resource);
 
     return token;
   }
 
   // RBAC are not supported currently, no resource specific scopes are needed
-  Future<AccessToken?> _getAccessTokenByRefreshToken(
-      {String? resource, List<String>? scopes}) async {
+  Future<AccessToken?> _getAccessTokenByRefreshToken(String? resource) async {
     final refreshToken = await _tokenStorage.refreshToken;
 
     if (refreshToken == null) {
@@ -100,19 +97,17 @@ class LogtoClient {
       final oidcConfig = await _getOidcConfig(httpClient);
 
       final response = await logto_core.fetchTokenByRefreshToken(
-          httpClient: httpClient,
-          tokenEndPoint: oidcConfig.tokenEndpoint,
-          clientId: config.appId,
-          refreshToken: refreshToken,
-          resource: resource,
-          scopes: scopes);
+        httpClient: httpClient,
+        tokenEndPoint: oidcConfig.tokenEndpoint,
+        clientId: config.appId,
+        refreshToken: refreshToken,
+        resource: resource,
+      );
 
-      final responseScopes = response.scope.split(' ');
+      final scopes = response.scope.split(' ');
 
       await _tokenStorage.setAccessToken(response.accessToken,
-          expiresIn: response.expiresIn,
-          resource: resource,
-          scopes: responseScopes);
+          expiresIn: response.expiresIn, resource: resource, scopes: scopes);
 
       // renew refresh token
       await _tokenStorage.setRefreshToken(response.refreshToken);
@@ -124,7 +119,7 @@ class LogtoClient {
         await _tokenStorage.setIdToken(idToken);
       }
 
-      return await _tokenStorage.getAccessToken(resource, responseScopes);
+      return await _tokenStorage.getAccessToken(resource, scopes);
     } finally {
       if (_httpClient == null) httpClient.close();
     }
