@@ -30,6 +30,14 @@ const Map<String, dynamic> mockUserInfoResponse = {
   "sub": "foo",
   "username": "username",
   "name": "name",
-  "avatar": "http://avatar.png",
-  "role_names": ['admin']
+  "picture": "http://avatar.png",
+  "email": "foo@logto.io",
+  "email_verified": true,
+  "phone_number": "123456789",
+  "phone_number_verified": true,
+  "custom_data": {},
+  "identities": {
+    "google": {"id": "google_id", "email": "foo@google.com"},
+  },
+  "user_roles": ["user"]
 };

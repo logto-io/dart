@@ -137,7 +137,7 @@ void main() {
     expect(result.refreshToken, mockRefreshTokenResponse['refresh_token']);
   });
 
-  test('Fetch UserInfo', () async {
+  test('Fetch UserInfo should return all valid fields', () async {
     const String endpoint = '/oidc/me';
     const String accessToken = 'access_token';
 
@@ -154,5 +154,15 @@ void main() {
 
     expect(interceptor.isDone, true);
     expect(result.sub, mockUserInfoResponse['sub']);
+    expect(result.name, mockUserInfoResponse['name']);
+    expect(result.username, mockUserInfoResponse['username']);
+    expect(result.picture, mockUserInfoResponse['picture']);
+    expect(result.customData, mockUserInfoResponse['custom_data']);
+    expect(result.email, mockUserInfoResponse['email']);
+    expect(result.emailVerified, mockUserInfoResponse['email_verified']);
+    expect(result.phoneNumber, mockUserInfoResponse['phone_number']);
+    expect(result.phoneNumberVerified,
+        mockUserInfoResponse['phone_number_verified']);
+    expect(result.identities, mockUserInfoResponse['identities']);
   });
 }
