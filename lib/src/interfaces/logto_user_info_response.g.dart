@@ -17,19 +17,36 @@ LogtoUserInfoResponse _$LogtoUserInfoResponseFromJson(
     sub: json['sub'] as String,
     username: json['username'] as String?,
     name: json['name'] as String?,
-    avatar: json['avatar'] as String?,
-    roleNames: (json['role_names'] as List<dynamic>?)
-        ?.map((e) => e as String)
-        .toList(),
+    picture: json['picture'] as String?,
+    email: json['email'] as String?,
+    emailVerified: json['email_verified'] as bool?,
+    phoneNumber: json['phone_number'] as String?,
+    phoneNumberVerified: json['phone_number_verified'] as bool?,
+    customData: json['custom_data'] as Map<String, dynamic>?,
+    identities: json['identities'] as Map<String, dynamic>?,
   );
 }
 
 Map<String, dynamic> _$LogtoUserInfoResponseToJson(
-        LogtoUserInfoResponse instance) =>
-    <String, dynamic>{
-      'sub': instance.sub,
-      'username': instance.username,
-      'name': instance.name,
-      'avatar': instance.avatar,
-      'role_names': instance.roleNames,
-    };
+    LogtoUserInfoResponse instance) {
+  final val = <String, dynamic>{
+    'sub': instance.sub,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('username', instance.username);
+  writeNotNull('name', instance.name);
+  writeNotNull('picture', instance.picture);
+  writeNotNull('email', instance.email);
+  writeNotNull('email_verified', instance.emailVerified);
+  writeNotNull('phone_number', instance.phoneNumber);
+  writeNotNull('phone_number_verified', instance.phoneNumberVerified);
+  writeNotNull('custom_data', instance.customData);
+  writeNotNull('identities', instance.identities);
+  return val;
+}
