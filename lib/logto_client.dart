@@ -1,6 +1,7 @@
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
+import 'package:logto_dart_sdk/src/interfaces/logto_user_info_response.dart';
 
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
@@ -68,20 +69,23 @@ class LogtoClient {
     return _oidcConfig!;
   }
 
-  Future<AccessToken?> getAccessToken({String? resource}) async {
+  Future<AccessToken?> getAccessToken(
+      {String? resource, List<String>? scopes}) async {
     final accessToken = await _tokenStorage.getAccessToken(resource);
 
     if (accessToken != null) {
       return accessToken;
     }
 
-    final token = await _getAccessTokenByRefreshToken(resource);
+    final token =
+        await _getAccessTokenByRefreshToken(resource: resource, scopes: scopes);
 
     return token;
   }
 
   // RBAC are not supported currently, no resource specific scopes are needed
-  Future<AccessToken?> _getAccessTokenByRefreshToken(String? resource) async {
+  Future<AccessToken?> _getAccessTokenByRefreshToken(
+      {String? resource, List<String>? scopes}) async {
     final refreshToken = await _tokenStorage.refreshToken;
 
     if (refreshToken == null) {
@@ -99,12 +103,15 @@ class LogtoClient {
           tokenEndPoint: oidcConfig.tokenEndpoint,
           clientId: config.appId,
           refreshToken: refreshToken,
-          resource: resource);
+          resource: resource,
+          scopes: scopes);
 
-      final scopes = response.scope.split(' ');
+      final responseScopes = response.scope.split(' ');
 
       await _tokenStorage.setAccessToken(response.accessToken,
-          expiresIn: response.expiresIn, resource: resource, scopes: scopes);
+          expiresIn: response.expiresIn,
+          resource: resource,
+          scopes: responseScopes);
 
       // renew refresh token
       await _tokenStorage.setRefreshToken(response.refreshToken);
@@ -116,7 +123,7 @@ class LogtoClient {
         await _tokenStorage.setIdToken(idToken);
       }
 
-      return await _tokenStorage.getAccessToken(resource, scopes);
+      return await _tokenStorage.getAccessToken(resource, responseScopes);
     } finally {
       if (_httpClient == null) httpClient.close();
     }
@@ -246,6 +253,31 @@ class LogtoClient {
       if (_httpClient == null) {
         httpClient.close();
       }
+    }
+  }
+
+  Future<LogtoUserInfoResponse> getUserInfo() async {
+    final httpClient = _httpClient ?? http.Client();
+
+    try {
+      final oidcConfig = await _getOidcConfig(httpClient);
+
+      final accessToken = await _tokenStorage.getAccessToken();
+
+      if (accessToken == null) {
+        throw LogtoAuthException(
+            LogtoAuthExceptions.authenticationError, 'not authenticated');
+      }
+
+      final userInfoResponse = await logto_core.fetchUserInfo(
+        httpClient: httpClient,
+        userInfoEndpoint: oidcConfig.userInfoEndpoint,
+        accessToken: accessToken.token,
+      );
+
+      return userInfoResponse;
+    } finally {
+      if (_httpClient == null) httpClient.close();
     }
   }
 }

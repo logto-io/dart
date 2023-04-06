@@ -43,7 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final redirectUri = 'io.logto://callback';
   final config = const LogtoConfig(
-      appId: 'xgSxW0MDpVqW2GDvCnlNb', endpoint: 'https://logto.dev');
+      appId: '<your-app-id>',
+      endpoint: 'http://localhost:3001',
+      scopes: ['email', 'phone']);
 
   late LogtoClient logtoClient;
 
@@ -105,6 +107,21 @@ class _MyHomePageState extends State<MyHomePage> {
       child: const Text('Sign Out'),
     );
 
+    Widget getUserInfoButton = TextButton(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.all(16.0),
+        textStyle: const TextStyle(fontSize: 20),
+      ),
+      onPressed: () async {
+        var userInfo = await logtoClient.getUserInfo();
+        setState(() {
+          content = userInfo.toJson().toString();
+        });
+      },
+      child: const Text('Get User Info'),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -126,6 +143,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? isAuthenticated == true
                     ? signOutButton
                     : signInButton
+                : const SizedBox.shrink(),
+            isAuthenticated != null
+                ? isAuthenticated == true
+                    ? getUserInfoButton
+                    : const SizedBox.shrink()
                 : const SizedBox.shrink()
           ],
         ),
