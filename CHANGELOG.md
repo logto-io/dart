@@ -17,3 +17,10 @@ iOS, Android
 - User sign-out
 - Retrieve idToken claims
 - Retrieve access token
+
+## 1.0.0
+
+### logto_client
+
+- Support RBAC
+- Add `LogtoClient.getUserInfo` to get authenticated user info
