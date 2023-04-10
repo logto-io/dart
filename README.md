@@ -171,3 +171,4 @@ void signOut() async {
 | getAccessToken | ({String? resource}) -> Future&#60;AccessToken&#62; | Request for an api resource specific access token for authorization |
 | signIn         | (String? redirectUri) -> Future&#60;void&#62;       | Init user sign-in flow                                              |
 | signOut        | () -> Future&#60;void&#62;                          | Sign-out                                                            |
+| getUserInfo    | () => Future&#60;UserInfo&#62;                      | Get user info                                                       |
