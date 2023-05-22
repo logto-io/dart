@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_secure_storage: ^6.0.0
-  http: ^0.13.5
+  http: ^1.0.0
   jose: ^0.3.2
   json_annotation: ^4.6.0
   path: ^1.8.1
