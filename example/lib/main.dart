@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final redirectUri = 'io.logto://callback';
   final config = const LogtoConfig(
-      appId: '<your-app-id>',
+      appId: 'oOeT50aNvY7QbLci6XJZt',
       endpoint: 'http://localhost:3001',
       scopes: ['email', 'phone']);
 

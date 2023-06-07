@@ -24,3 +24,7 @@ iOS, Android
 
 - Support RBAC
 - Add `LogtoClient.getUserInfo` to get authenticated user info
+
+## 1.0.1
+
+- fix Logto sign-out bug, the token revoke endpoint was misconfigured
