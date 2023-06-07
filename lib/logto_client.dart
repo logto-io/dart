@@ -237,7 +237,7 @@ class LogtoClient {
         try {
           await logto_core.revoke(
             httpClient: httpClient,
-            revocationEndpoint: oidcConfig.authorizationEndpoint,
+            revocationEndpoint: oidcConfig.revocationEndpoint,
             clientId: config.appId,
             token: refreshToken,
           );
