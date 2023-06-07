@@ -25,6 +25,10 @@ iOS, Android
 - Support RBAC
 - Add `LogtoClient.getUserInfo` to get authenticated user info
 
-## 1.0.1
+## 1.1.0
 
 - fix Logto sign-out bug, the token revoke endpoint was misconfigured
+- bump version to support Flutter 3.10
+- bump the http dependency to the latest version
+- bump the flutter_web_auth dependency to the latest version
+- bump the flutter_secure_storage dependency to the latest version
