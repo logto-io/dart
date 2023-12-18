@@ -61,8 +61,16 @@ class TokenStorage {
     _idToken = idToken;
   }
 
-  static String buildAccessTokenKey(String? resource, [List<String>? scopes]) =>
-      "${_encodeScopes(scopes)}@${resource ?? ''}";
+  static String buildAccessTokenKey(
+      {String? resource, String? organizationId, List<String>? scopes}) {
+    String key = "${_encodeScopes(scopes)}@${resource ?? ''}";
+
+    if (organizationId != null && organizationId.isNotEmpty) {
+      key = '$key#$organizationId';
+    }
+
+    return key;
+  }
 
   Future<Map<String, AccessToken>?> _getAccessTokenMapFromStorage() async {
     final tokenMapStorage =
@@ -82,9 +90,13 @@ class TokenStorage {
     return null;
   }
 
-  Future<AccessToken?> getAccessToken(
-      [String? resource, List<String>? scopes]) async {
-    final key = buildAccessTokenKey(resource, scopes);
+  Future<AccessToken?> getAccessToken({
+    String? resource,
+    List<String>? scopes,
+    String? organizationId,
+  }) async {
+    final key = buildAccessTokenKey(
+        resource: resource, scopes: scopes, organizationId: null);
 
     _accessTokenMap ??= await _getAccessTokenMapFromStorage();
 
@@ -128,8 +140,12 @@ class TokenStorage {
   }
 
   Future<void> setAccessToken(String accessToken,
-      {String? resource, List<String>? scopes, required int expiresIn}) async {
-    final key = buildAccessTokenKey(resource, scopes);
+      {String? resource,
+      List<String>? scopes,
+      String? organizationId,
+      required int expiresIn}) async {
+    final key = buildAccessTokenKey(
+        resource: resource, organizationId: organizationId, scopes: scopes);
 
     // load current accessTokenMap
     final currentAccessTokenMap =

@@ -15,6 +15,8 @@ import 'logto_core.dart' as logto_core;
 import 'logto_core.dart';
 
 export '/src/interfaces/logto_config.dart';
+export '/src/interfaces/openid.dart';
+export '/src/utilities/constants.dart';
 
 // Logto SDK
 class LogtoClient {
@@ -70,20 +72,34 @@ class LogtoClient {
     return _oidcConfig!;
   }
 
-  Future<AccessToken?> getAccessToken({String? resource}) async {
-    final accessToken = await _tokenStorage.getAccessToken(resource);
+  Future<AccessToken?> getAccessToken(
+      {String? resource, String? organizationId}) async {
+    final accessToken = await _tokenStorage.getAccessToken(
+        resource: resource, organizationId: organizationId);
 
     if (accessToken != null) {
       return accessToken;
     }
 
-    final token = await _getAccessTokenByRefreshToken(resource);
+    final token = await _getAccessTokenByRefreshToken(
+        resource: resource, organizationId: organizationId);
 
     return token;
   }
 
+  Future<AccessToken?> getOrganizationToken(String organizationId) async {
+    if (config.scopes == null ||
+        !config.scopes!.contains(LogtoUserScope.organizations.value)) {
+      throw LogtoAuthException(LogtoAuthExceptions.missingScopeError,
+          'organizations scope is not specified');
+    }
+
+    return await getAccessToken(organizationId: organizationId);
+  }
+
   // RBAC are not supported currently, no resource specific scopes are needed
-  Future<AccessToken?> _getAccessTokenByRefreshToken(String? resource) async {
+  Future<AccessToken?> _getAccessTokenByRefreshToken(
+      {String? resource, String? organizationId}) async {
     final refreshToken = await _tokenStorage.refreshToken;
 
     if (refreshToken == null) {
@@ -97,17 +113,20 @@ class LogtoClient {
       final oidcConfig = await _getOidcConfig(httpClient);
 
       final response = await logto_core.fetchTokenByRefreshToken(
-        httpClient: httpClient,
-        tokenEndPoint: oidcConfig.tokenEndpoint,
-        clientId: config.appId,
-        refreshToken: refreshToken,
-        resource: resource,
-      );
+          httpClient: httpClient,
+          tokenEndPoint: oidcConfig.tokenEndpoint,
+          clientId: config.appId,
+          refreshToken: refreshToken,
+          resource: resource,
+          organizationId: organizationId);
 
       final scopes = response.scope.split(' ');
 
       await _tokenStorage.setAccessToken(response.accessToken,
-          expiresIn: response.expiresIn, resource: resource, scopes: scopes);
+          expiresIn: response.expiresIn,
+          resource: resource,
+          organizationId: organizationId,
+          scopes: scopes);
 
       // renew refresh token
       await _tokenStorage.setRefreshToken(response.refreshToken);
@@ -119,7 +138,8 @@ class LogtoClient {
         await _tokenStorage.setIdToken(idToken);
       }
 
-      return await _tokenStorage.getAccessToken(resource, scopes);
+      return await _tokenStorage.getAccessToken(
+          resource: resource, organizationId: organizationId, scopes: scopes);
     } finally {
       if (_httpClient == null) httpClient.close();
     }

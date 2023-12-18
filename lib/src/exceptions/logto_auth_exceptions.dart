@@ -2,7 +2,8 @@ enum LogtoAuthExceptions {
   callbackUriValidationError,
   idTokenValidationError,
   authenticationError,
-  isLoadingError
+  missingScopeError,
+  isLoadingError,
 }
 
 class LogtoAuthException implements Exception {

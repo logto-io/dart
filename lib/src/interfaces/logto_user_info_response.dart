@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'organization_data.dart';
 
 part 'logto_user_info_response.g.dart';
 
@@ -24,6 +25,12 @@ class LogtoUserInfoResponse {
   final Map<String, dynamic>? customData;
   @JsonKey(name: 'identities')
   final Map<String, dynamic>? identities;
+  @JsonKey(name: 'organizations')
+  final List<String>? organizations;
+  @JsonKey(name: 'organization_roles')
+  final List<String>? organizationRoles;
+  @JsonKey(name: 'organization_data')
+  final List<OrganizationData>? organizationData;
 
   LogtoUserInfoResponse({
     required this.sub,
@@ -36,6 +43,9 @@ class LogtoUserInfoResponse {
     this.phoneNumberVerified,
     this.customData,
     this.identities,
+    this.organizations,
+    this.organizationRoles,
+    this.organizationData,
   });
 
   factory LogtoUserInfoResponse.fromJson(Map<String, dynamic> json) =>
