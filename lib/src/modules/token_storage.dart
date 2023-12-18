@@ -96,7 +96,7 @@ class TokenStorage {
     String? organizationId,
   }) async {
     final key = buildAccessTokenKey(
-        resource: resource, scopes: scopes, organizationId: null);
+        resource: resource, scopes: scopes, organizationId: organizationId);
 
     _accessTokenMap ??= await _getAccessTokenMapFromStorage();
 

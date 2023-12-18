@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -54,6 +55,28 @@ void main() {
     expect(signInUri.queryParameters, containsPair('prompt', 'consent'));
     expect(
         signInUri.queryParameters, containsPair('interaction_mode', 'signUp'));
+  });
+
+  test('Generate SignIn Uri with organization scope', () {
+    const String authorizationEndpoint = 'http://foo.com';
+    const clientId = 'foo_client';
+    var redirectUri = 'http://foo.app.io';
+    const String codeChallenge = 'foo_code_challenge';
+    const String state = 'foo_state';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        scopes: [LogtoUserScope.organizations.value]);
+
+    expect(
+        signInUri.queryParametersAll,
+        containsPair('resource',
+            ['http://foo.api', LogtoReservedResource.organization.value]));
   });
 
   test('Generate SignOut Uri', () {
