@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:http/http.dart' as http;
 import 'package:logto_dart_sdk/src/interfaces/logto_user_info_response.dart';
 
@@ -111,8 +109,6 @@ Future<LogtoUserInfoResponse> fetchUserInfo(
     required String accessToken}) async {
   final response = await httpClient.post(Uri.parse(userInfoEndpoint),
       headers: {'Authorization': 'Bearer $accessToken'});
-
-  log(response.body, name: 'fetchUserInfo');
 
   var body = httpResponseHandler(response);
 
