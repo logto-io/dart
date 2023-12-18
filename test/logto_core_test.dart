@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +6,6 @@ import 'package:logto_dart_sdk/logto_core.dart';
 import 'package:nock/nock.dart';
 
 import 'package:logto_dart_sdk/logto_core.dart' as logto_core;
-import 'package:logto_dart_sdk/src/utilities/constants.dart';
 
 import 'mocks/responses.dart';
 

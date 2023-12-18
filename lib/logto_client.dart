@@ -9,7 +9,6 @@ import '/src/modules/id_token.dart';
 import '/src/modules/logto_storage_strategy.dart';
 import '/src/modules/pkce.dart';
 import '/src/modules/token_storage.dart';
-import '/src/utilities/constants.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
 import 'logto_core.dart';
