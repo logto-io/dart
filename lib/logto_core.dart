@@ -6,6 +6,10 @@ import '/src/interfaces/logto_interfaces.dart';
 import '/src/utilities/constants.dart';
 import '/src/utilities/http_utils.dart';
 import '/src/utilities/utils.dart';
+import '/src/interfaces/openid.dart';
+
+export '/src/interfaces/openid.dart';
+export '/src/utilities/constants.dart';
 
 const String _codeChallengeMethod = 'S256';
 const String _responseType = 'code';
@@ -70,6 +74,7 @@ Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
   required String clientId,
   required String refreshToken,
   String? resource,
+  String? organizationId,
   List<String>? scopes,
 }) async {
   Map<String, dynamic> payload = {
@@ -80,6 +85,10 @@ Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
 
   if (resource != null && resource.isNotEmpty) {
     payload.addAll({'resource': resource});
+  }
+
+  if (organizationId != null && organizationId.isNotEmpty) {
+    payload.addAll({'organization_id': organizationId});
   }
 
   if (scopes != null && scopes.isNotEmpty) {
@@ -138,6 +147,15 @@ Uri generateSignInUri(
     'response_type': _responseType,
     'prompt': prompt,
   };
+
+  // Auto add organization resource if scopes contains organization scope
+  if (scopes != null && scopes.contains(LogtoUserScope.organizations.value)) {
+    resources ??= [];
+
+    if (!resources.contains(LogtoReservedResource.organization.value)) {
+      resources.add(LogtoReservedResource.organization.value);
+    }
+  }
 
   if (resources != null && resources.isNotEmpty) {
     queryParameters.addAll({'resource': resources});

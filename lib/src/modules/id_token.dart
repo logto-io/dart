@@ -3,10 +3,38 @@ import 'package:jose/jose.dart';
 import 'package:jose/src/util.dart';
 
 abstract class UserInfo implements JsonObject {
+  /// Subject (the user ID) of this token.
   String get subject => this['sub'];
+
+  /// Full name of the user.
   String? get name => this['name'];
+
+  /// Username of the user.
   String? get username => this['username'];
+
+  /// URL of the user's profile picture.
   String? get avatar => this['avatar'];
+
+  /// Email address of the user.
+  String? get email => this['email'];
+
+  /// Phone number of the user.
+  String? get phone => this['phone'];
+
+  /// Whether the user's email address has been verified.
+  String? get emailVerified => this['email_verified'];
+
+  /// Whether the user's phone number has been verified.
+  String? get phoneVerified => this['phone_verified'];
+
+  /// Roles that the user has for API resources.
+  List<String>? get roles => this['roles'];
+
+  /// Organization IDs that the user has membership in.
+  List<String>? get organizations => this['organizations'];
+
+  /// All organization roles that the user has. The format is `{organizationId}:{roleName}`.
+  List<String>? get organizationRoles => this['organization_roles'];
 
   factory UserInfo.fromJson(Map<String, dynamic> json) = _UserInfoImpl.fromJson;
 }

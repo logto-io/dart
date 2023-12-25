@@ -24,6 +24,15 @@ LogtoUserInfoResponse _$LogtoUserInfoResponseFromJson(
     phoneNumberVerified: json['phone_number_verified'] as bool?,
     customData: json['custom_data'] as Map<String, dynamic>?,
     identities: json['identities'] as Map<String, dynamic>?,
+    organizations: (json['organizations'] as List<dynamic>?)
+        ?.map((e) => e as String)
+        .toList(),
+    organizationRoles: (json['organization_roles'] as List<dynamic>?)
+        ?.map((e) => e as String)
+        .toList(),
+    organizationData: (json['organization_data'] as List<dynamic>?)
+        ?.map((e) => OrganizationData.fromJson(e as Map<String, dynamic>))
+        .toList(),
   );
 }
 
@@ -48,5 +57,8 @@ Map<String, dynamic> _$LogtoUserInfoResponseToJson(
   writeNotNull('phone_number_verified', instance.phoneNumberVerified);
   writeNotNull('custom_data', instance.customData);
   writeNotNull('identities', instance.identities);
+  writeNotNull('organizations', instance.organizations);
+  writeNotNull('organization_roles', instance.organizationRoles);
+  writeNotNull('organization_data', instance.organizationData);
   return val;
 }

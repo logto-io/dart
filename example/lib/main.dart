@@ -42,10 +42,19 @@ class _MyHomePageState extends State<MyHomePage> {
   bool? isAuthenticated;
 
   final redirectUri = 'io.logto://callback';
-  final config = const LogtoConfig(
-      appId: '<your-app-id>',
-      endpoint: 'http://localhost:3001',
-      scopes: ['email', 'phone']);
+
+  final config = LogtoConfig(
+      appId: 'oOeT50aNvY7QbLci6XJZt',
+      endpoint: 'http://localhost:3001/',
+      scopes: [
+        LogtoUserScope.phone.value,
+        LogtoUserScope.email.value,
+        LogtoUserScope.roles.value,
+        LogtoUserScope.organizations.value,
+        LogtoUserScope.organizationRoles.value,
+        LogtoUserScope.identities.value,
+        LogtoUserScope.customData.value,
+      ]);
 
   late LogtoClient logtoClient;
 
