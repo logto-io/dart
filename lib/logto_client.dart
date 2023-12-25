@@ -128,7 +128,9 @@ class LogtoClient {
           scopes: scopes);
 
       // renew refresh token
-      await _tokenStorage.setRefreshToken(response.refreshToken);
+      if (response.refreshToken != null) {
+        await _tokenStorage.setRefreshToken(response.refreshToken);
+      }
 
       // verify and store id_token if not null
       if (response.idToken != null) {
