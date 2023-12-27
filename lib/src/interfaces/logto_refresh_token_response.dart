@@ -6,8 +6,8 @@ part 'logto_refresh_token_response.g.dart';
 class LogtoRefreshTokenResponse {
   @JsonKey(name: 'access_token', required: true, disallowNullValue: true)
   final String accessToken;
-  @JsonKey(name: 'refresh_token', required: true, disallowNullValue: true)
-  final String refreshToken;
+  @JsonKey(name: 'refresh_token')
+  final String? refreshToken;
   @JsonKey(name: 'id_token')
   final String? idToken;
   @JsonKey(name: 'scope', required: true, disallowNullValue: true)
@@ -17,7 +17,7 @@ class LogtoRefreshTokenResponse {
 
   LogtoRefreshTokenResponse(
       {required this.accessToken,
-      required this.refreshToken,
+      this.refreshToken,
       this.idToken,
       required this.expiresIn,
       required this.scope});
