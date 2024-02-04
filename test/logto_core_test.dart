@@ -50,7 +50,7 @@ void main() {
     expect(signInUri.queryParameters,
         containsPair('scope', reservedScopes.join(' ')));
     expect(signInUri.queryParameters, containsPair('response_type', 'code'));
-    expect(signInUri.queryParameters, containsPair('prompt', 'consent'));
+    expect(signInUri.queryParameters, containsPair('prompt', 'none'));
     expect(
         signInUri.queryParameters, containsPair('interaction_mode', 'signUp'));
   });

@@ -8,28 +8,20 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Flutter SDK Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-          ),
-        ),
-      ),
-      home: const MyHomePage(title: 'Logto SDK Demo Home Page'),
+      home: MyHomePage(title: 'Logto SDK Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
@@ -46,6 +38,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final config = LogtoConfig(
       appId: 'oOeT50aNvY7QbLci6XJZt',
       endpoint: 'http://localhost:3001/',
+      resources: [
+        'http://localhost:3001/'
+      ],
       scopes: [
         LogtoUserScope.phone.value,
         LogtoUserScope.email.value,
@@ -64,6 +59,18 @@ class _MyHomePageState extends State<MyHomePage> {
     _init();
   }
 
+  Future<AccessToken?> getOrganizationAccessToken(String organizationId) async {
+    var token =
+        await logtoClient.getAccessToken(organizationId: organizationId);
+
+    return token;
+  }
+
+  Future getIdTokenClaims() async {
+    var claims = await logtoClient.idTokenClaims;
+    return claims;
+  }
+
   void render() async {
     if (await logtoClient.isAuthenticated) {
       var claims = await logtoClient.idTokenClaims;
@@ -79,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _init() async {
+  void _init() {
     logtoClient = LogtoClient(
       config: config,
       httpClient: http.Client(),
@@ -90,15 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Widget signInButton = TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.deepPurpleAccent,
-        padding: const EdgeInsets.all(16.0),
-        textStyle: const TextStyle(fontSize: 20),
-      ),
       onPressed: () async {
-        await logtoClient.signIn(redirectUri);
-        render();
+        logtoClient.signIn(redirectUri);
       },
       child: const Text('Sign In'),
     );

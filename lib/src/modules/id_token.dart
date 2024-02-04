@@ -40,7 +40,7 @@ abstract class UserInfo implements JsonObject {
 }
 
 class _UserInfoImpl extends JsonObject with UserInfo {
-  _UserInfoImpl.fromJson(Map<String, dynamic> json) : super.from(json);
+  _UserInfoImpl.fromJson(Map<String, dynamic> super.json) : super.from();
 }
 
 class OpenIdClaims extends JsonWebTokenClaims with UserInfo {
@@ -57,7 +57,7 @@ class OpenIdClaims extends JsonWebTokenClaims with UserInfo {
   DateTime get issuedAt => super.issuedAt!;
 
   @override
-  OpenIdClaims.fromJson(Map<String, dynamic> json) : super.fromJson(json);
+  OpenIdClaims.fromJson(Map<String, dynamic> super.json) : super.fromJson();
 }
 
 class IdToken extends JsonWebToken {
