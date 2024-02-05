@@ -71,13 +71,11 @@ class LogtoClient {
     return token?.serialization;
   }
 
-  // Get the idToken claims.
   Future<OpenIdClaims?> get idTokenClaims async {
     final token = await _tokenStorage.idToken;
     return token?.claims;
   }
 
-  // Get the OIDC provider configuration.
   Future<OidcProviderConfig> _getOidcConfig(http.Client httpClient) async {
     if (_oidcConfig != null) {
       return _oidcConfig!;
