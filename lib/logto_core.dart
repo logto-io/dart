@@ -12,7 +12,7 @@ export '/src/exceptions/logto_auth_exceptions.dart';
 
 const String _codeChallengeMethod = 'S256';
 const String _responseType = 'code';
-const String _prompt = 'none';
+const String _prompt = 'consent';
 const String _requestContentType = 'application/x-www-form-urlencoded';
 
 /**
