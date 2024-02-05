@@ -1,21 +1,35 @@
 import 'package:http/http.dart' as http;
-import 'package:logto_dart_sdk/src/interfaces/logto_user_info_response.dart';
 
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
 import '/src/utilities/constants.dart';
 import '/src/utilities/http_utils.dart';
 import '/src/utilities/utils.dart';
-import '/src/interfaces/openid.dart';
 
-export '/src/interfaces/openid.dart';
+export '/src/interfaces/logto_interfaces.dart';
 export '/src/utilities/constants.dart';
+export '/src/exceptions/logto_auth_exceptions.dart';
 
 const String _codeChallengeMethod = 'S256';
 const String _responseType = 'code';
 const String _prompt = 'consent';
 const String _requestContentType = 'application/x-www-form-urlencoded';
 
+/**
+ * logto_core.dart
+ * 
+ * This file is part of the Logto SDK. 
+ * It contains the core functionalities of the OIDC authentication flow.
+ * Use this module if you want to build your own custom SDK.
+ */
+
+/**
+ * By default Logto use sign-in as the landing page for the user.
+ * Use this enum to specify the interaction mode.
+ * 
+ * - signIn: The user will be redirected to the sign-in page.
+ * - signUp: The user will be redirected to the sign-up page.
+ */
 enum InteractionMode { signIn, signUp }
 
 extension InteractionModeExtension on InteractionMode {
@@ -31,6 +45,9 @@ extension InteractionModeExtension on InteractionMode {
   }
 }
 
+/**
+ * Fetch the OIDC provider configuration.
+ */
 Future<OidcProviderConfig> fetchOidcConfig(
     http.Client httpClient, String endpoint) async {
   final response = await httpClient.get(Uri.parse(endpoint));
@@ -40,6 +57,9 @@ Future<OidcProviderConfig> fetchOidcConfig(
   return OidcProviderConfig.fromJson(body);
 }
 
+/**
+ * Fetch token using the authorization code.
+ */
 Future<LogtoCodeTokenResponse> fetchTokenByAuthorizationCode(
     {required http.Client httpClient,
     required String tokenEndPoint,
@@ -68,6 +88,9 @@ Future<LogtoCodeTokenResponse> fetchTokenByAuthorizationCode(
   return LogtoCodeTokenResponse.fromJson(body);
 }
 
+/**
+ * Fetch token using the refresh token.
+ */
 Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
   required http.Client httpClient,
   required String tokenEndPoint,
@@ -103,6 +126,9 @@ Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
   return LogtoRefreshTokenResponse.fromJson(body);
 }
 
+/**
+ * Fetch user info using the access token.
+ */
 Future<LogtoUserInfoResponse> fetchUserInfo(
     {required http.Client httpClient,
     required String userInfoEndpoint,
@@ -115,6 +141,9 @@ Future<LogtoUserInfoResponse> fetchUserInfo(
   return LogtoUserInfoResponse.fromJson(body);
 }
 
+/**
+ * Revoke the token.
+ */
 Future<void> revoke({
   required http.Client httpClient,
   required String revocationEndpoint,
@@ -125,6 +154,10 @@ Future<void> revoke({
         headers: {'Content-Type': _requestContentType},
         body: {'client_id': clientId, 'token': token});
 
+/**
+ * Generate the sign-in URI (Authorization URI). 
+ * This URI will be used to initiate the OIDC authentication flow.
+ */
 Uri generateSignInUri(
     {required String authorizationEndpoint,
     required clientId,
@@ -169,6 +202,9 @@ Uri generateSignInUri(
   return addQueryParameters(signInUri, queryParameters);
 }
 
+/**
+ * Generate the sign-out URI (End Session URI). 
+ */
 Uri generateSignOutUri({
   required String endSessionEndpoint,
   required String clientId,
@@ -182,6 +218,14 @@ Uri generateSignOutUri({
   });
 }
 
+/**
+ * A utility function to verify and parse the code from the authorization callback URI.
+ * 
+ * - verify the callback URI
+ * - verify the state
+ * - error detection
+ * - parse the code from the callback URI
+ */
 String verifyAndParseCodeFromCallbackUri(
     String callbackUri, String redirectUri, String state) {
   if (!callbackUri.startsWith(redirectUri)) {

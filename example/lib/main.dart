@@ -8,7 +8,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -23,37 +23,48 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MyHomePage(title: 'Logto SDK Demo Home Page'),
+      home: const MyHomePage(title: 'Logto SDK Demo'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+ButtonStyle secondaryButtonStyle = TextButton.styleFrom(
+  foregroundColor: Colors.black,
+  padding: const EdgeInsets.all(16.0),
+  textStyle: const TextStyle(fontSize: 20),
+);
+
+ButtonStyle primaryButtonStyle = TextButton.styleFrom(
+  foregroundColor: Colors.white,
+  backgroundColor: Colors.deepPurpleAccent,
+  padding: const EdgeInsets.all(16.0),
+  textStyle: const TextStyle(fontSize: 20),
+);
+
 class _MyHomePageState extends State<MyHomePage> {
   static String welcome = 'Logto SDK Demo Home Page';
   String? content;
-  bool? isAuthenticated;
+  bool isAuthenticated = false;
 
   final redirectUri = 'io.logto://callback';
 
   final config = LogtoConfig(
-      appId: 'oOeT50aNvY7QbLci6XJZt',
-      endpoint: 'http://localhost:3001/',
+      appId: '<your app id>',
+      endpoint: '<your logto endpoint>',
+      // resources: ['<your api resources>'], // Uncomment this line to request resource scopes
       scopes: [
         LogtoUserScope.phone.value,
         LogtoUserScope.email.value,
-        LogtoUserScope.roles.value,
-        LogtoUserScope.organizations.value,
-        LogtoUserScope.organizationRoles.value,
-        LogtoUserScope.identities.value,
-        LogtoUserScope.customData.value,
+        // LogtoUserScope.organizations.value, // Uncomment this line to request organization scope
+        // Add additional resource scopes here
       ]);
 
   late LogtoClient logtoClient;
@@ -68,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (await logtoClient.isAuthenticated) {
       var claims = await logtoClient.idTokenClaims;
       setState(() {
-        content = claims!.toJson().toString();
+        content = claims!.toJson().toString().replaceAll(',', ',\n');
         isAuthenticated = true;
       });
       return;
@@ -79,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _init() async {
+  void _init() {
     logtoClient = LogtoClient(
       config: config,
       httpClient: http.Client(),
@@ -87,15 +98,32 @@ class _MyHomePageState extends State<MyHomePage> {
     render();
   }
 
+  Future<void> _showMyDialog(String title, String content) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              style: secondaryButtonStyle,
+              child: const Text('Got it'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget signInButton = TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.deepPurpleAccent,
-        padding: const EdgeInsets.all(16.0),
-        textStyle: const TextStyle(fontSize: 20),
-      ),
+      style: primaryButtonStyle,
       onPressed: () async {
         await logtoClient.signIn(redirectUri);
         render();
@@ -104,11 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     Widget signOutButton = TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.black,
-        padding: const EdgeInsets.all(16.0),
-        textStyle: const TextStyle(fontSize: 20),
-      ),
+      style: secondaryButtonStyle,
       onPressed: () async {
         await logtoClient.signOut();
         render();
@@ -117,18 +141,33 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     Widget getUserInfoButton = TextButton(
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.black,
-        padding: const EdgeInsets.all(16.0),
-        textStyle: const TextStyle(fontSize: 20),
-      ),
+      style: secondaryButtonStyle,
       onPressed: () async {
         var userInfo = await logtoClient.getUserInfo();
-        setState(() {
-          content = userInfo.toJson().toString();
-        });
+        _showMyDialog(
+            'User Info', userInfo.toJson().toString().replaceAll(',', ',\n'));
       },
       child: const Text('Get User Info'),
+    );
+
+    Widget getOrganizationTokenButton = TextButton(
+      style: secondaryButtonStyle,
+      onPressed: () async {
+        var token = await logtoClient
+            .getOrganizationToken('<organization id returned in id_token>');
+        _showMyDialog('Organization Token', token!.toJson().toString());
+      },
+      child: const Text('Get Organization Token'),
+    );
+
+    Widget getResourceTokenButton = TextButton(
+      style: secondaryButtonStyle,
+      onPressed: () async {
+        var token = await logtoClient.getAccessToken(
+            resource: '<your resource indicator>');
+        _showMyDialog('Resource Token', token!.toJson().toString());
+      },
+      child: const Text('Get Resource Token'),
     );
 
     return Scaffold(
@@ -148,16 +187,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 content ?? '',
               ),
             ),
-            isAuthenticated != null
-                ? isAuthenticated == true
-                    ? signOutButton
-                    : signInButton
+            isAuthenticated == true ? signOutButton : signInButton,
+            isAuthenticated == true
+                ? getUserInfoButton
                 : const SizedBox.shrink(),
-            isAuthenticated != null
-                ? isAuthenticated == true
-                    ? getUserInfoButton
-                    : const SizedBox.shrink()
-                : const SizedBox.shrink()
+            isAuthenticated == true &&
+                    (config.scopes
+                            ?.contains(LogtoUserScope.organizations.value) ??
+                        false)
+                ? getOrganizationTokenButton
+                : const SizedBox.shrink(),
+            isAuthenticated == true && config.resources != null
+                ? getResourceTokenButton
+                : const SizedBox.shrink(),
           ],
         ),
       ),

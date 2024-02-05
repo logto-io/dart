@@ -1,7 +1,6 @@
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
-import 'package:logto_dart_sdk/src/interfaces/logto_user_info_response.dart';
 
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
@@ -11,13 +10,30 @@ import '/src/modules/pkce.dart';
 import '/src/modules/token_storage.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
-import 'logto_core.dart';
 
-export '/src/interfaces/logto_config.dart';
-export '/src/interfaces/openid.dart';
+export '/src/interfaces/logto_interfaces.dart';
 export '/src/utilities/constants.dart';
+export '/src/exceptions/logto_auth_exceptions.dart';
 
-// Logto SDK
+/**
+ * LogtoClient
+ * 
+ * The main class for the Logto SDK.
+ * It provides all the user authentication and authorization methods.
+ * 
+ * @param config: LogtoConfig - the basic configuration object for the Logto SDK.
+ * @param storageProvider: LogtoStorageStrategy (optional) - default is [InMemoryTokenStorage] used for storing tokens.
+ * @param httpClient: http.Client (optional) - custom [http.Client] to be used for making http requests.
+ * 
+ * Example:
+ * ```dart
+ * final config = LogtoConfig(
+ *  appId: 'oOeT50aNvY7QbLci6XJZt',
+ *  endpoint: 'http://localhost:3001/',
+ * );
+ * 
+ * final logtoClient = LogtoClient(config);
+ */
 class LogtoClient {
   final LogtoConfig config;
 
@@ -26,9 +42,8 @@ class LogtoClient {
 
   static late TokenStorage _tokenStorage;
 
-  /// Custom [http.Client].
-  ///
-  /// Note that you will have to call `close()` yourself when passing a [http.Client] instance.
+  // Custom [http.Client].
+  // Note that you will have to call `close()` yourself when passing a [http.Client] instance.
   late final http.Client? _httpClient;
 
   bool _loading = false;
@@ -46,6 +61,7 @@ class LogtoClient {
     _tokenStorage = TokenStorage(storageProvider);
   }
 
+  // Use idToken to check if the user is authenticated.
   Future<bool> get isAuthenticated async {
     return await _tokenStorage.idToken != null;
   }
@@ -65,12 +81,14 @@ class LogtoClient {
       return _oidcConfig!;
     }
 
-    final discoveryUri = utils.appendUriPath(config.endpoint, discoveryPath);
+    final discoveryUri =
+        utils.appendUriPath(config.endpoint, logto_core.discoveryPath);
     _oidcConfig = await logto_core.fetchOidcConfig(httpClient, discoveryUri);
 
     return _oidcConfig!;
   }
 
+  // Get the access token by resource indicator or organizationId.
   Future<AccessToken?> getAccessToken(
       {String? resource, String? organizationId}) async {
     final accessToken = await _tokenStorage.getAccessToken(
@@ -86,9 +104,11 @@ class LogtoClient {
     return token;
   }
 
+  // Get the access token for the organization by organizationId.
   Future<AccessToken?> getOrganizationToken(String organizationId) async {
     if (config.scopes == null ||
-        !config.scopes!.contains(LogtoUserScope.organizations.value)) {
+        !config.scopes!
+            .contains(logto_core.LogtoUserScope.organizations.value)) {
       throw LogtoAuthException(LogtoAuthExceptions.missingScopeError,
           'organizations scope is not specified');
     }
@@ -96,7 +116,8 @@ class LogtoClient {
     return await getAccessToken(organizationId: organizationId);
   }
 
-  // RBAC are not supported currently, no resource specific scopes are needed
+  // Fetch the access token by refresh token.
+  // No need to specify the scopes for the resource, all the related scopes in the refresh token's grant list will be returned.
   Future<AccessToken?> _getAccessTokenByRefreshToken(
       {String? resource, String? organizationId}) async {
     final refreshToken = await _tokenStorage.refreshToken;
@@ -165,8 +186,9 @@ class LogtoClient {
     }
   }
 
+  // Sign in using the PKCE flow.
   Future<void> signIn(String redirectUri,
-      [InteractionMode? interactionMode]) async {
+      [logto_core.InteractionMode? interactionMode]) async {
     if (_loading) {
       throw LogtoAuthException(
           LogtoAuthExceptions.isLoadingError, 'Already signing in...');
@@ -191,10 +213,10 @@ class LogtoClient {
         scopes: config.scopes,
         interactionMode: interactionMode,
       );
-      String? callbackUri;
 
       final redirectUriScheme = Uri.parse(redirectUri).scheme;
-      callbackUri = await FlutterWebAuth.authenticate(
+
+      final String callbackUri = await FlutterWebAuth.authenticate(
         url: signInUri.toString(),
         callbackUrlScheme: redirectUriScheme,
         preferEphemeral: true,
@@ -207,6 +229,7 @@ class LogtoClient {
     }
   }
 
+  // Handle the sign-in callback and complete the token exchange process.
   Future _handleSignInCallback(
       String callbackUri, String redirectUri, http.Client httpClient) async {
     final code = logto_core.verifyAndParseCodeFromCallbackUri(
@@ -237,6 +260,7 @@ class LogtoClient {
         expiresIn: tokenResponse.expiresIn);
   }
 
+  // Sign out the user.
   Future<void> signOut() async {
     // Throw error is authentication status not found
     final idToken = await _tokenStorage.idToken;
@@ -275,6 +299,7 @@ class LogtoClient {
     }
   }
 
+  // Fetch user info from the user info endpoint.
   Future<LogtoUserInfoResponse> getUserInfo() async {
     final httpClient = _httpClient ?? http.Client();
 
