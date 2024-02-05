@@ -57,8 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final redirectUri = 'io.logto://callback';
 
   final config = LogtoConfig(
-      appId: 'oOeT50aNvY7QbLci6XJZt',
-      endpoint: 'http://localhost:3001/',
+      appId: '<your app id>',
+      endpoint: '<your logto endpoint>',
       // resources: ['<your api resources>'], // Uncomment this line to request resource scopes
       scopes: [
         LogtoUserScope.phone.value,
@@ -153,7 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget getOrganizationTokenButton = TextButton(
       style: secondaryButtonStyle,
       onPressed: () async {
-        var token = await logtoClient.getOrganizationToken('cikmgibbmtvv');
+        var token = await logtoClient
+            .getOrganizationToken('<organization id returned in id_token>');
         _showMyDialog('Organization Token', token!.toJson().toString());
       },
       child: const Text('Get Organization Token'),
@@ -163,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
       style: secondaryButtonStyle,
       onPressed: () async {
         var token = await logtoClient.getAccessToken(
-            resource: 'http://localhost:3001/api/test');
+            resource: '<your resource indicator>');
         _showMyDialog('Resource Token', token!.toJson().toString());
       },
       child: const Text('Get Resource Token'),
