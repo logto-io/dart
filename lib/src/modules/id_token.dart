@@ -2,7 +2,7 @@ import 'package:jose/jose.dart';
 // ignore: implementation_imports
 import 'package:jose/src/util.dart';
 
-abstract class UserInfo implements JsonObject {
+abstract mixin class UserInfo implements JsonObject {
   /// Subject (the user ID) of this token.
   String get subject => this['sub'];
 
