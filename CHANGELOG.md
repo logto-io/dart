@@ -56,3 +56,5 @@ iOS, Android
 Migrate to dart 3.0.0
 
 - Fix the `UserInfo` abstract class used as mixin incompatibility issue
+- SDK now supports Dart ^3.0.0
+- < 3.0.0 users please use the previous version of the SDK
