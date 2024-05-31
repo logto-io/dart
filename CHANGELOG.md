@@ -50,3 +50,11 @@ iOS, Android
 
 - Export all the necessary classes and interfaces from `logto_core` to `logto_client` package
 - Update the example app to demonstrate the new organization feature
+
+## 2.0.0
+
+Upgrade to dart 3.0.0
+
+- Fix the `UserInfo` abstract class used as mixin incompatibility issue
+- SDK now supports Dart ^3.0.0
+- < 3.0.0 users please use the previous version of the SDK
