@@ -11,9 +11,9 @@ import '/src/modules/token_storage.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
 
+export '/src/exceptions/logto_auth_exceptions.dart';
 export '/src/interfaces/logto_interfaces.dart';
 export '/src/utilities/constants.dart';
-export '/src/exceptions/logto_auth_exceptions.dart';
 
 /**
  * LogtoClient
@@ -306,7 +306,7 @@ class LogtoClient {
     try {
       final oidcConfig = await _getOidcConfig(httpClient);
 
-      final accessToken = await _tokenStorage.getAccessToken();
+      final accessToken = await getAccessToken();
 
       if (accessToken == null) {
         throw LogtoAuthException(

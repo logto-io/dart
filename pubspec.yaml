@@ -1,6 +1,6 @@
 name: logto_dart_sdk
 description: Logto's Flutter SDK packages.
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/logto-io/dart
 documentation: https://docs.logto.io/sdk/flutter/
 

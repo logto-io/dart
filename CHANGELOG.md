@@ -58,3 +58,11 @@ Upgrade to dart 3.0.0
 - Fix the `UserInfo` abstract class used as mixin incompatibility issue
 - SDK now supports Dart ^3.0.0
 - < 3.0.0 users please use the previous version of the SDK
+
+## 2.0.1
+
+Bug fix
+
+Issue: `LogtoClient.getUserInfo` method throws an `not authenticated` error when the initial access token is expired.
+Expected behavior: The method should refresh the access token and return the user info properly.
+Fix: Always get the access token by calling `LogtoClient.getAccessToken`, which will refresh the token automatically if it's expired.
