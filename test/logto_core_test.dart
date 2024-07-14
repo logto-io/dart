@@ -77,6 +77,96 @@ void main() {
             ['http://foo.api', LogtoReservedResource.organization.value]));
   });
 
+  test('Generate SignIn Uri with direct sign in specified', () {
+    const String authorizationEndpoint = 'http://foo.com';
+    const clientId = 'foo_client';
+    var redirectUri = 'http://foo.app.io';
+    const String codeChallenge = 'foo_code_challenge';
+    const String state = 'foo_state';
+    const String directSignIn = 'social:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `social:` passes validation',
+      () {
+    const String authorizationEndpoint = 'http://foo.com';
+    const clientId = 'foo_client';
+    var redirectUri = 'http://foo.app.io';
+    const String codeChallenge = 'foo_code_challenge';
+    const String state = 'foo_state';
+    const String directSignIn = 'social:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `sso:` passes validation',
+      () {
+    const String authorizationEndpoint = 'http://foo.com';
+    const clientId = 'foo_client';
+    var redirectUri = 'http://foo.app.io';
+    const String codeChallenge = 'foo_code_challenge';
+    const String state = 'foo_state';
+    const String directSignIn = 'sso:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `wrong:` fails validation',
+      () {
+    const String authorizationEndpoint = 'http://foo.com';
+    const clientId = 'foo_client';
+    var redirectUri = 'http://foo.app.io';
+    const String codeChallenge = 'foo_code_challenge';
+    const String state = 'foo_state';
+    const String directSignIn = 'wrong:connector';
+
+    expect(
+        () => logto_core.generateSignInUri(
+            authorizationEndpoint: authorizationEndpoint,
+            clientId: clientId,
+            redirectUri: redirectUri,
+            codeChallenge: codeChallenge,
+            resources: ['http://foo.api'],
+            state: state,
+            directSignIn: directSignIn),
+        throwsA(predicate((e) =>
+            e is AssertionError &&
+            e.message ==
+                'Invalid format for directSignIn: $directSignIn, '
+                    'expected one of `social:{connector}` or `sso:{connector}`')));
+  });
+
   test('Generate SignOut Uri', () {
     const String endSessionEndpoint = 'https://foo.com';
     const String clientId = 'foo_client';

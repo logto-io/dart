@@ -167,7 +167,14 @@ Uri generateSignInUri(
     List<String>? scopes,
     List<String>? resources,
     InteractionMode? interactionMode,
+    String? directSignIn,
     String prompt = _prompt}) {
+  assert(
+    isValidDirectSignInFormat(directSignIn),
+    'Invalid format for directSignIn: $directSignIn, '
+    'expected one of `social:{connector}` or `sso:{connector}`',
+  );
+
   var signInUri = Uri.parse(authorizationEndpoint);
 
   Map<String, dynamic> queryParameters = {
@@ -178,6 +185,7 @@ Uri generateSignInUri(
     'state': state,
     'scope': withReservedScopes(scopes ?? []).join(' '),
     'response_type': _responseType,
+    'direct_sign_in': directSignIn,
     'prompt': prompt,
   };
 
@@ -216,6 +224,13 @@ Uri generateSignOutUri({
     'client_id': clientId,
     'post_logout_redirect_uri': postLogoutRedirectUri?.toString()
   });
+}
+
+bool isValidDirectSignInFormat(String? directSignIn) {
+  if (directSignIn == null) return true;
+
+  RegExp regex = RegExp(r'^(social|sso):[a-zA-Z0-9]+$');
+  return regex.hasMatch(directSignIn);
 }
 
 /**
