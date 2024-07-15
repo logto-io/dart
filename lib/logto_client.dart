@@ -33,6 +33,7 @@ export '/src/utilities/constants.dart';
  * );
  * 
  * final logtoClient = LogtoClient(config);
+ * ```
  */
 class LogtoClient {
   final LogtoConfig config;
@@ -187,8 +188,11 @@ class LogtoClient {
   }
 
   // Sign in using the PKCE flow.
-  Future<void> signIn(String redirectUri,
-      [logto_core.InteractionMode? interactionMode]) async {
+  Future<void> signIn(
+    String redirectUri, {
+    logto_core.InteractionMode? interactionMode,
+    String? directSignIn,
+  }) async {
     if (_loading) {
       throw LogtoAuthException(
           LogtoAuthExceptions.isLoadingError, 'Already signing in...');
@@ -212,6 +216,7 @@ class LogtoClient {
         resources: config.resources,
         scopes: config.scopes,
         interactionMode: interactionMode,
+        directSignIn: directSignIn,
       );
 
       final redirectUriScheme = Uri.parse(redirectUri).scheme;

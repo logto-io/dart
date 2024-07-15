@@ -66,3 +66,9 @@ Bug fix
 Issue: `LogtoClient.getUserInfo` method throws an `not authenticated` error when the initial access token is expired.
 Expected behavior: The method should refresh the access token and return the user info properly.
 Fix: Always get the access token by calling `LogtoClient.getAccessToken`, which will refresh the token automatically if it's expired.
+
+## 2.0.2
+
+### Features
+
+- Added directSignIn parameter to client `signIn` method. This parameter allows you to skip the first screen and invoke the sign-in process directly. ** Introduces a breaking change by adding optional named method parameters **
