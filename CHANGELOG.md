@@ -71,11 +71,11 @@ Fix: Always get the access token by calling `LogtoClient.getAccessToken`, which 
 
 Bug fix
 
-Fix the IdToken claims key parsing issue:
+Fix the `OpenIdClaims` class key parsing issue:
 
-- `avatar` key is now `picture`
-- `phone` key is now `phone_number`
-- `phone_verified` key is now `phone_number_verified`
+- `avatar` key is now `picture` mapped from the `picture` key in the token claims
+- `phone` key is now `phoneNumber` mapped from the `phone_number` key in the token claims
+- `phoneVerified` key is now `phoneNumberVerified` mapped from the `phone_number_verified` key in the token claims
 
 Previous key mapping values are always empty as they are not available in the IdToken claims.
 This fix update the key mapping to the correct values.
