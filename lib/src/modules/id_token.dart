@@ -13,19 +13,19 @@ abstract mixin class UserInfo implements JsonObject {
   String? get username => this['username'];
 
   /// URL of the user's profile picture.
-  String? get avatar => this['avatar'];
+  String? get picture => this['picture'];
 
   /// Email address of the user.
   String? get email => this['email'];
 
   /// Phone number of the user.
-  String? get phone => this['phone'];
+  String? get phoneNumber => this['phone_number'];
 
   /// Whether the user's email address has been verified.
   String? get emailVerified => this['email_verified'];
 
   /// Whether the user's phone number has been verified.
-  String? get phoneVerified => this['phone_verified'];
+  String? get phoneNumberVerified => this['phone_number_verified'];
 
   /// Roles that the user has for API resources.
   List<String>? get roles => this['roles'];

@@ -66,3 +66,16 @@ Bug fix
 Issue: `LogtoClient.getUserInfo` method throws an `not authenticated` error when the initial access token is expired.
 Expected behavior: The method should refresh the access token and return the user info properly.
 Fix: Always get the access token by calling `LogtoClient.getAccessToken`, which will refresh the token automatically if it's expired.
+
+## 2.0.2
+
+Bug fix
+
+Fix the IdToken claims key parsing issue:
+
+- `avatar` key is now `picture`
+- `phone` key is now `phone_number`
+- `phone_verified` key is now `phone_number_verified`
+
+Previous key mapping values are always empty as they are not available in the IdToken claims.
+This fix update the key mapping to the correct values.
