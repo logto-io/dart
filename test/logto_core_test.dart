@@ -18,12 +18,13 @@ void main() {
     nock.cleanAll();
   });
 
+  const String authorizationEndpoint = 'http://foo.com';
+  const clientId = 'foo_client';
+  var redirectUri = 'http://foo.app.io';
+  const String codeChallenge = 'foo_code_challenge';
+  const String state = 'foo_state';
+
   test('Generate SignIn Uri', () {
-    const String authorizationEndpoint = 'http://foo.com';
-    const clientId = 'foo_client';
-    var redirectUri = 'http://foo.app.io';
-    const String codeChallenge = 'foo_code_challenge';
-    const String state = 'foo_state';
     const InteractionMode interactionMode = InteractionMode.signUp;
 
     var signInUri = logto_core.generateSignInUri(
@@ -56,12 +57,6 @@ void main() {
   });
 
   test('Generate SignIn Uri with organization scope', () {
-    const String authorizationEndpoint = 'http://foo.com';
-    const clientId = 'foo_client';
-    var redirectUri = 'http://foo.app.io';
-    const String codeChallenge = 'foo_code_challenge';
-    const String state = 'foo_state';
-
     var signInUri = logto_core.generateSignInUri(
         authorizationEndpoint: authorizationEndpoint,
         clientId: clientId,
@@ -75,6 +70,130 @@ void main() {
         signInUri.queryParametersAll,
         containsPair('resource',
             ['http://foo.api', LogtoReservedResource.organization.value]));
+  });
+
+  test('Generate SignIn Uri with direct sign in specified', () {
+    const String directSignIn = 'social:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `social:` passes validation',
+      () {
+    const String directSignIn = 'social:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `sso:` passes validation',
+      () {
+    const String directSignIn = 'sso:connector';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        resources: ['http://foo.api'],
+        state: state,
+        directSignIn: directSignIn);
+
+    expect(signInUri.queryParameters,
+        containsPair('direct_sign_in', directSignIn));
+  });
+
+  test('SignIn Uri with direct sign starting with `wrong:` fails validation',
+      () {
+    const String directSignIn = 'wrong:connector';
+
+    expect(
+        () => logto_core.generateSignInUri(
+            authorizationEndpoint: authorizationEndpoint,
+            clientId: clientId,
+            redirectUri: redirectUri,
+            codeChallenge: codeChallenge,
+            resources: ['http://foo.api'],
+            state: state,
+            directSignIn: directSignIn),
+        throwsA(predicate((e) =>
+            e is AssertionError &&
+            e.message ==
+                'Invalid format for directSignIn: $directSignIn, '
+                    'expected one of `social:{connector}` or `sso:{connector}`')));
+  });
+
+  test('SignIn Uri with firstScreen and loginHint', () {
+    const FirstScreen firstScreen = FirstScreen.identifierRegister;
+    const String loginHint = 'foo@logto.io';
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        state: state,
+        firstScreen: firstScreen,
+        loginHint: loginHint);
+
+    expect(signInUri.queryParameters,
+        containsPair('first_screen', FirstScreen.identifierRegister.value));
+    expect(signInUri.queryParameters, containsPair('login_hint', loginHint));
+  });
+
+  test('SignIn Uri with firstScreen and identifiers', () {
+    const FirstScreen firstScreen = FirstScreen.identifierRegister;
+    const List<IdentifierType> identifiers = [
+      IdentifierType.email,
+      IdentifierType.phone
+    ];
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        state: state,
+        firstScreen: firstScreen,
+        identifiers: identifiers);
+
+    expect(signInUri.queryParameters,
+        containsPair('first_screen', FirstScreen.identifierRegister.value));
+    expect(
+        signInUri.queryParameters, containsPair('identifier', 'email phone'));
+  });
+
+  test('SignIn Uri with extraParams', () {
+    const Map<String, String> extraParams = {'foo': 'bar'};
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        state: state,
+        extraParams: extraParams);
+
+    expect(signInUri.queryParameters, containsPair('foo', 'bar'));
   });
 
   test('Generate SignOut Uri', () {
