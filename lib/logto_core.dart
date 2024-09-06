@@ -147,7 +147,7 @@ Uri generateSignInUri({
    * Direct sign-in is a feature that allows you to skip the sign-in page,
    * and directly sign in the user using a specific social or sso connector.
    * 
-   * The format should be `social:{connector}` or `sso:{connector}`.
+   * The format should be `social:{connectorTarget}` or `sso:{connectorId}`.
    */
   String? directSignIn,
   /**
