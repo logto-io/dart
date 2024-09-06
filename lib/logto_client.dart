@@ -161,7 +161,7 @@ class LogtoClient {
       }
 
       return await _tokenStorage.getAccessToken(
-          resource: resource, organizationId: organizationId, scopes: scopes);
+          resource: resource, organizationId: organizationId);
     } finally {
       if (_httpClient == null) httpClient.close();
     }
@@ -257,7 +257,8 @@ class LogtoClient {
         idToken: idToken,
         accessToken: tokenResponse.accessToken,
         refreshToken: tokenResponse.refreshToken,
-        expiresIn: tokenResponse.expiresIn);
+        expiresIn: tokenResponse.expiresIn,
+        scopes: tokenResponse.scope.split(' '));
   }
 
   // Sign out the user.

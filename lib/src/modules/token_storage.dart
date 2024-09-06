@@ -92,11 +92,10 @@ class TokenStorage {
 
   Future<AccessToken?> getAccessToken({
     String? resource,
-    List<String>? scopes,
     String? organizationId,
   }) async {
-    final key = buildAccessTokenKey(
-        resource: resource, scopes: scopes, organizationId: organizationId);
+    final key =
+        buildAccessTokenKey(resource: resource, organizationId: organizationId);
 
     _accessTokenMap ??= await _getAccessTokenMapFromStorage();
 
@@ -145,7 +144,9 @@ class TokenStorage {
       String? organizationId,
       required int expiresIn}) async {
     final key = buildAccessTokenKey(
-        resource: resource, organizationId: organizationId, scopes: scopes);
+      resource: resource,
+      organizationId: organizationId,
+    );
 
     // load current accessTokenMap
     final currentAccessTokenMap =
@@ -197,10 +198,11 @@ class TokenStorage {
     required IdToken idToken,
     required String accessToken,
     String? refreshToken,
+    List<String>? scopes,
     required int expiresIn,
   }) async {
     await Future.wait([
-      setAccessToken(accessToken, expiresIn: expiresIn),
+      setAccessToken(accessToken, expiresIn: expiresIn, scopes: scopes),
       setIdToken(idToken),
       setRefreshToken(refreshToken),
     ]);

@@ -36,13 +36,14 @@ void main() {
     });
     test('should set access token locally and persist it', () async {
       await sut.setAccessToken(accessToken,
-          resource: resource, scopes: scope.split(' '), expiresIn: 1);
+          resource: resource, scopes: scope.split(' '), expiresIn: 1000);
 
       final nullToken = await sut.getAccessToken();
       expect(nullToken, isNull);
 
       final tokenStorage = await sut.getAccessToken(
-          resource: resource, scopes: scope.split(' '));
+        resource: resource,
+      );
 
       expect(tokenStorage?.token, accessToken);
       // scope should be sorted
@@ -53,7 +54,7 @@ void main() {
           await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey);
 
       final tokenMap = jsonDecode(persistedStorageAccessToken ?? '{}');
-      final Map<String, dynamic> token = tokenMap['email profile@/api/foo'];
+      final Map<String, dynamic> token = tokenMap['@/api/foo'];
 
       expect(token['token'], tokenStorage?.token);
       expect(token['scope'], tokenStorage?.scope);
@@ -71,8 +72,8 @@ void main() {
       final nullToken = await sut.getAccessToken();
       expect(nullToken, isNull);
 
-      final tokenStorage = await sut.getAccessToken(
-          scopes: scope.split(' '), organizationId: organizationId);
+      final tokenStorage =
+          await sut.getAccessToken(organizationId: organizationId);
 
       expect(tokenStorage?.token, accessToken);
       // scope should be sorted
@@ -84,8 +85,7 @@ void main() {
 
       final tokenMap = jsonDecode(persistedStorageAccessToken ?? '{}');
 
-      final Map<String, dynamic> token =
-          tokenMap['email profile@#$organizationId'];
+      final Map<String, dynamic> token = tokenMap['@#$organizationId'];
 
       expect(token['token'], tokenStorage?.token);
       expect(token['scope'], tokenStorage?.scope);
@@ -98,12 +98,12 @@ void main() {
           resource: resource, scopes: scope.split(' '), expiresIn: 1);
 
       final tokenStorage = await sut.getAccessToken(
-          resource: resource, scopes: scope.split(' '));
+        resource: resource,
+      );
       expect(tokenStorage?.token, accessToken);
 
       await Future.delayed(const Duration(seconds: 2), () async {
-        final token = await sut.getAccessToken(
-            resource: resource, scopes: scope.split(' '));
+        final token = await sut.getAccessToken(resource: resource);
         expect(token, isNull);
         expect(
             await storageStrategy.read(key: _TokenStorageKeys.accessTokenKey),
@@ -159,10 +159,7 @@ void main() {
 
       await sut.clear();
 
-      expect(
-          await sut.getAccessToken(
-              resource: resource, scopes: scope.split(' ')),
-          null);
+      expect(await sut.getAccessToken(resource: resource), null);
       expect(await sut.refreshToken, null);
       expect(await sut.idToken, null);
 
