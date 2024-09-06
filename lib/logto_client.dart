@@ -10,6 +10,7 @@ import '/src/modules/pkce.dart';
 import '/src/modules/token_storage.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
+import '/src/utilities/constants.dart';
 
 export '/src/exceptions/logto_auth_exceptions.dart';
 export '/src/interfaces/logto_interfaces.dart';
@@ -188,7 +189,10 @@ class LogtoClient {
 
   // Sign in using the PKCE flow.
   Future<void> signIn(String redirectUri,
-      [logto_core.InteractionMode? interactionMode]) async {
+      {logto_core.InteractionMode? interactionMode,
+      String? loginHint,
+      String? directSignIn,
+      FirstScreen? firstScreen}) async {
     if (_loading) {
       throw LogtoAuthException(
           LogtoAuthExceptions.isLoadingError, 'Already signing in...');
@@ -212,6 +216,9 @@ class LogtoClient {
         resources: config.resources,
         scopes: config.scopes,
         interactionMode: interactionMode,
+        loginHint: loginHint,
+        firstScreen: firstScreen,
+        directSignIn: directSignIn,
       );
 
       final redirectUriScheme = Uri.parse(redirectUri).scheme;

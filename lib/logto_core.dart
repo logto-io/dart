@@ -17,33 +17,11 @@ const String _requestContentType = 'application/x-www-form-urlencoded';
 
 /**
  * logto_core.dart
- * 
- * This file is part of the Logto SDK. 
+ *
+ * This file is part of the Logto SDK.
  * It contains the core functionalities of the OIDC authentication flow.
  * Use this module if you want to build your own custom SDK.
  */
-
-/**
- * By default Logto use sign-in as the landing page for the user.
- * Use this enum to specify the interaction mode.
- * 
- * - signIn: The user will be redirected to the sign-in page.
- * - signUp: The user will be redirected to the sign-up page.
- */
-enum InteractionMode { signIn, signUp }
-
-extension InteractionModeExtension on InteractionMode {
-  String get value {
-    switch (this) {
-      case InteractionMode.signIn:
-        return 'signIn';
-      case InteractionMode.signUp:
-        return 'signUp';
-      default:
-        throw Exception("Invalid value");
-    }
-  }
-}
 
 /**
  * Fetch the OIDC provider configuration.
@@ -98,7 +76,6 @@ Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
   required String refreshToken,
   String? resource,
   String? organizationId,
-  List<String>? scopes,
 }) async {
   Map<String, dynamic> payload = {
     'grant_type': refreshTokenGrantType,
@@ -112,10 +89,6 @@ Future<LogtoRefreshTokenResponse> fetchTokenByRefreshToken({
 
   if (organizationId != null && organizationId.isNotEmpty) {
     payload.addAll({'organization_id': organizationId});
-  }
-
-  if (scopes != null && scopes.isNotEmpty) {
-    payload.addAll({'scope': scopes.join(' ')});
   }
 
   final response = await httpClient.post(Uri.parse(tokenEndPoint),
@@ -158,16 +131,40 @@ Future<void> revoke({
  * Generate the sign-in URI (Authorization URI). 
  * This URI will be used to initiate the OIDC authentication flow.
  */
-Uri generateSignInUri(
-    {required String authorizationEndpoint,
-    required clientId,
-    required String redirectUri,
-    required String codeChallenge,
-    required String state,
-    List<String>? scopes,
-    List<String>? resources,
-    InteractionMode? interactionMode,
-    String prompt = _prompt}) {
+Uri generateSignInUri({
+  required String authorizationEndpoint,
+  required clientId,
+  required String redirectUri,
+  required String codeChallenge,
+  required String state,
+  String prompt = _prompt,
+  List<String>? scopes,
+  List<String>? resources,
+  String? loginHint,
+  @Deprecated('Legacy parameter, use firstScreen instead')
+  InteractionMode? interactionMode,
+  /**
+     * Direct sign-in is a feature that allows you to skip the sign-in page,
+     * and directly sign in the user using a specific social or sso connector.
+     * 
+     * The format should be `social:{connector}` or `sso:{connector}`.
+     */
+  String? directSignIn,
+  /**
+   * The first screen to be shown in the sign-in experience.
+   */
+  FirstScreen? firstScreen,
+  /**
+   * Extra parameters to be added to the sign-in URI.
+   */
+  Map<String, String>? extraParams,
+}) {
+  assert(
+    isValidDirectSignInFormat(directSignIn),
+    'Invalid format for directSignIn: $directSignIn, '
+    'expected one of `social:{connector}` or `sso:{connector}`',
+  );
+
   var signInUri = Uri.parse(authorizationEndpoint);
 
   Map<String, dynamic> queryParameters = {
@@ -194,16 +191,32 @@ Uri generateSignInUri(
     queryParameters.addAll({'resource': resources});
   }
 
+  if (loginHint != null) {
+    queryParameters.addAll({'login_hint': loginHint});
+  }
+
   if (interactionMode != null) {
     // need to align with the backend OIDC params name
     queryParameters.addAll({'interaction_mode': interactionMode.value});
+  }
+
+  if (directSignIn != null) {
+    queryParameters.addAll({'direct_sign_in': directSignIn});
+  }
+
+  if (firstScreen != null) {
+    queryParameters.addAll({'first_screen': firstScreen.value});
+  }
+
+  if (extraParams != null) {
+    queryParameters.addAll(extraParams);
   }
 
   return addQueryParameters(signInUri, queryParameters);
 }
 
 /**
- * Generate the sign-out URI (End Session URI). 
+ * Generate the sign-out URI (End Session URI).
  */
 Uri generateSignOutUri({
   required String endSessionEndpoint,
@@ -220,7 +233,7 @@ Uri generateSignOutUri({
 
 /**
  * A utility function to verify and parse the code from the authorization callback URI.
- * 
+ *
  * - verify the callback URI
  * - verify the state
  * - error detection
@@ -256,4 +269,14 @@ String verifyAndParseCodeFromCallbackUri(
   }
 
   return queryParams['code']!;
+}
+
+/**
+ * Verify the direct sign-in parameter format.
+ */
+bool isValidDirectSignInFormat(String? directSignIn) {
+  if (directSignIn == null) return true;
+
+  RegExp regex = RegExp(r'^(social|sso):[a-zA-Z0-9]+$');
+  return regex.hasMatch(directSignIn);
 }
