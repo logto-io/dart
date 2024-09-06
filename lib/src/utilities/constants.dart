@@ -34,7 +34,6 @@ String getOrganizationIdFromUrn(String organizationUrn) {
  * - signIn: The user will be redirected to the sign-in page.
  * - signUp: The user will be redirected to the sign-up page.
  */
-@Deprecated('Legacy parameter, use firstScreen instead')
 enum InteractionMode { signIn, signUp }
 
 extension InteractionModeExtension on InteractionMode {
@@ -76,6 +75,32 @@ extension FirstScreenExtension on FirstScreen {
         return 'identifier:register';
       case FirstScreen.singleSignOn:
         return 'single_sign_on';
+      default:
+        throw Exception("Invalid value");
+    }
+  }
+}
+
+/**
+ * The type of the identifier supported by Logto.
+ * This field is used along with FirstScreen to specify the first screen to be shown in the sign-in experience.
+ * If specified, the first screen will be shown based on the identifier type.
+ */
+enum IdentifierType {
+  email,
+  phone,
+  username,
+}
+
+extension IdentifierTypeExtension on IdentifierType {
+  String get value {
+    switch (this) {
+      case IdentifierType.email:
+        return 'email';
+      case IdentifierType.phone:
+        return 'phone';
+      case IdentifierType.username:
+        return 'username';
       default:
         throw Exception("Invalid value");
     }

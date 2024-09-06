@@ -160,6 +160,28 @@ void main() {
     expect(signInUri.queryParameters, containsPair('login_hint', loginHint));
   });
 
+  test('SignIn Uri with firstScreen and identifiers', () {
+    const FirstScreen firstScreen = FirstScreen.identifierRegister;
+    const List<IdentifierType> identifiers = [
+      IdentifierType.email,
+      IdentifierType.phone
+    ];
+
+    var signInUri = logto_core.generateSignInUri(
+        authorizationEndpoint: authorizationEndpoint,
+        clientId: clientId,
+        redirectUri: redirectUri,
+        codeChallenge: codeChallenge,
+        state: state,
+        firstScreen: firstScreen,
+        identifiers: identifiers);
+
+    expect(signInUri.queryParameters,
+        containsPair('first_screen', FirstScreen.identifierRegister.value));
+    expect(
+        signInUri.queryParameters, containsPair('identifier', 'email phone'));
+  });
+
   test('SignIn Uri with extraParams', () {
     const Map<String, String> extraParams = {'foo': 'bar'};
 

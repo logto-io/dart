@@ -188,11 +188,15 @@ class LogtoClient {
   }
 
   // Sign in using the PKCE flow.
-  Future<void> signIn(String redirectUri,
-      {logto_core.InteractionMode? interactionMode,
-      String? loginHint,
-      String? directSignIn,
-      FirstScreen? firstScreen}) async {
+  Future<void> signIn(
+    String redirectUri, {
+    logto_core.InteractionMode? interactionMode,
+    String? loginHint,
+    String? directSignIn,
+    FirstScreen? firstScreen,
+    List<IdentifierType>? identifiers,
+    Map<String, String>? extraParams,
+  }) async {
     if (_loading) {
       throw LogtoAuthException(
           LogtoAuthExceptions.isLoadingError, 'Already signing in...');
@@ -219,6 +223,8 @@ class LogtoClient {
         loginHint: loginHint,
         firstScreen: firstScreen,
         directSignIn: directSignIn,
+        identifiers: identifiers,
+        extraParams: extraParams,
       );
 
       final redirectUriScheme = Uri.parse(redirectUri).scheme;

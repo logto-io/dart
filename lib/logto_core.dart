@@ -144,16 +144,23 @@ Uri generateSignInUri({
   @Deprecated('Legacy parameter, use firstScreen instead')
   InteractionMode? interactionMode,
   /**
-     * Direct sign-in is a feature that allows you to skip the sign-in page,
-     * and directly sign in the user using a specific social or sso connector.
-     * 
-     * The format should be `social:{connector}` or `sso:{connector}`.
-     */
+   * Direct sign-in is a feature that allows you to skip the sign-in page,
+   * and directly sign in the user using a specific social or sso connector.
+   * 
+   * The format should be `social:{connector}` or `sso:{connector}`.
+   */
   String? directSignIn,
   /**
    * The first screen to be shown in the sign-in experience.
    */
   FirstScreen? firstScreen,
+  /**
+   * Identifier type of the first screen to be shown in the sign-in experience.
+   *
+   * This parameter is applicable only when the `firstScreen` is set to
+   *  either `identifierSignIn` or `identifierRegister
+   */
+  List<IdentifierType>? identifiers,
   /**
    * Extra parameters to be added to the sign-in URI.
    */
@@ -206,6 +213,12 @@ Uri generateSignInUri({
 
   if (firstScreen != null) {
     queryParameters.addAll({'first_screen': firstScreen.value});
+  }
+
+  if (identifiers != null && identifiers.isNotEmpty) {
+    queryParameters.addAll({
+      'identifier': identifiers.map((e) => e.value).join(' '),
+    });
   }
 
   if (extraParams != null) {
