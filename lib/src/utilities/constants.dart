@@ -57,6 +57,7 @@ extension InteractionModeExtension on InteractionMode {
 enum FirstScreen {
   signIn,
   register,
+  resetPassword,
   identifierSignIn,
   identifierRegister,
   singleSignOn,
@@ -69,6 +70,8 @@ extension FirstScreenExtension on FirstScreen {
         return 'sign_in';
       case FirstScreen.register:
         return 'register';
+      case FirstScreen.resetPassword:
+        return 'reset_password';
       case FirstScreen.identifierSignIn:
         return 'identifier:sign_in';
       case FirstScreen.identifierRegister:
