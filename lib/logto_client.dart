@@ -1,7 +1,13 @@
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:app_links/app_links.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 
+import '/src/utilities/stream_awaiter.dart';
+import '/src/modules/callback_strategy.dart';
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
 import '/src/modules/id_token.dart';
@@ -15,6 +21,7 @@ import '/src/utilities/constants.dart';
 export '/src/exceptions/logto_auth_exceptions.dart';
 export '/src/interfaces/logto_interfaces.dart';
 export '/src/utilities/constants.dart';
+export '/src/modules/callback_strategy.dart';
 
 /**
  * LogtoClient
@@ -35,6 +42,8 @@ export '/src/utilities/constants.dart';
  * 
  * final logtoClient = LogtoClient(config);
  */
+final appLinks = AppLinks();
+
 class LogtoClient {
   final LogtoConfig config;
 
@@ -53,18 +62,32 @@ class LogtoClient {
 
   OidcProviderConfig? _oidcConfig;
 
-  LogtoClient({
-    required this.config,
-    LogtoStorageStrategy? storageProvider,
-    http.Client? httpClient,
-  }) {
+  late final CallbackStrategy _callbackStrategy;
+
+  LogtoClient(
+      {required this.config,
+      LogtoStorageStrategy? storageProvider,
+      http.Client? httpClient,
+      CallbackStrategy? callbackStrategy}) {
     _httpClient = httpClient;
     _tokenStorage = TokenStorage(storageProvider);
+    _callbackStrategy = callbackStrategy ?? SchemeStrategy();
+  }
+
+  final _authController = StreamController<bool>.broadcast();
+
+  Stream<bool> get isAuthenticatedStream => _authController.stream;
+
+  void init() async {
+    bool value = await isAuthenticated;
+
+    _authController.sink.add(value);
   }
 
   // Use idToken to check if the user is authenticated.
   Future<bool> get isAuthenticated async {
-    return await _tokenStorage.idToken != null;
+    bool result = await _tokenStorage.idToken != null;
+    return result;
   }
 
   Future<String?> get idToken async {
@@ -159,6 +182,8 @@ class LogtoClient {
         final idToken = IdToken.unverified(response.idToken!);
         await _verifyIdToken(idToken, oidcConfig);
         await _tokenStorage.setIdToken(idToken);
+
+        _authController.sink.add(true);
       }
 
       return await _tokenStorage.getAccessToken(
@@ -227,13 +252,7 @@ class LogtoClient {
         extraParams: extraParams,
       );
 
-      final redirectUriScheme = Uri.parse(redirectUri).scheme;
-
-      final String callbackUri = await FlutterWebAuth.authenticate(
-        url: signInUri.toString(),
-        callbackUrlScheme: redirectUriScheme,
-        preferEphemeral: true,
-      );
+      final String callbackUri = await _getCallbackUrl(signInUri);
 
       await _handleSignInCallback(callbackUri, redirectUri, httpClient);
     } finally {
@@ -272,6 +291,8 @@ class LogtoClient {
         refreshToken: tokenResponse.refreshToken,
         expiresIn: tokenResponse.expiresIn,
         scopes: tokenResponse.scope.split(' '));
+
+    _authController.sink.add(true);
   }
 
   // Sign out the user.
@@ -306,6 +327,7 @@ class LogtoClient {
       }
 
       await _tokenStorage.clear();
+      _authController.sink.add(false);
     } finally {
       if (_httpClient == null) {
         httpClient.close();
@@ -337,5 +359,59 @@ class LogtoClient {
     } finally {
       if (_httpClient == null) httpClient.close();
     }
+  }
+
+  Future<String> _getCallbackUrl(Uri url) async {
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch ${url.toString()}');
+    }
+
+    var result = await _athuneticateUserFlow();
+
+    return result.toString();
+  }
+
+  Future<Uri> _athuneticateUserFlow() async {
+    late Uri result;
+
+    if (_callbackStrategy.strategy == CallbackStrategyType.scheme)
+    {
+      await awaitUriLinkStream(
+        appLinks.uriLinkStream,
+        (uri) async {
+          if (uri != null) {
+            result = uri;
+          } else {
+            throw Exception("Failed to authorize");
+          }
+        },
+      );
+
+      return result;
+    }
+
+    final server = await HttpServer.bind(InternetAddress.anyIPv4, (_callbackStrategy as LocalServerStrategy).port);
+
+    await for (HttpRequest request in server) {
+      // Handle the request
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType = ContentType.html
+        ..writeln("""
+<html>
+<script>window.close();</script>
+</html>
+""");
+      await request.response.close();
+      result = request.requestedUri;
+      await server.close();
+      break; // Exit the loop
+    }
+
+    return result;
+  }
+
+  void dispose() {
+    _authController.close();
   }
 }
