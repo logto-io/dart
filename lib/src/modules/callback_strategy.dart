@@ -3,37 +3,47 @@ enum CallbackStrategyType {
   localServer
 }
 
-abstract class CallbackStrategy {
-  final CallbackStrategyType _strategy = CallbackStrategyType.scheme;
+enum BrowserLaunchMode {
+  platformDefault,
+  external
+}
 
-  CallbackStrategyType get strategy => _strategy;
+abstract class CallbackStrategy {
+  CallbackStrategyType get strategy;
+  BrowserLaunchMode get launchMode;
 }
 
 class SchemeStrategy implements CallbackStrategy {
-  @override
-  late CallbackStrategyType _strategy;
+  late BrowserLaunchMode _launchMode;
+  final CallbackStrategyType _strategy = CallbackStrategyType.scheme;
 
-  SchemeStrategy(){
-    _strategy = CallbackStrategyType.scheme;
+  SchemeStrategy({BrowserLaunchMode? launchMode}){
+    _launchMode = launchMode ?? BrowserLaunchMode.platformDefault;
   }
   
   @override
   CallbackStrategyType get strategy => _strategy;
+  
+  @override
+  BrowserLaunchMode get launchMode => _launchMode;
 
 }
 
 class LocalServerStrategy implements CallbackStrategy {
-  @override
-  late CallbackStrategyType _strategy;
+  late BrowserLaunchMode _launchMode;
+  final CallbackStrategyType _strategy = CallbackStrategyType.localServer;
   final int _port;
 
-  LocalServerStrategy(this._port) {
-    _strategy  = CallbackStrategyType.localServer;
+  LocalServerStrategy(this._port,{BrowserLaunchMode? launchMode}){
+    _launchMode = launchMode ?? BrowserLaunchMode.platformDefault;
   }
 
   @override
   CallbackStrategyType get strategy => _strategy;
 
   int get port => _port;
+  
+  @override
+  BrowserLaunchMode get launchMode => throw _launchMode;
   
 }

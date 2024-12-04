@@ -86,8 +86,7 @@ class LogtoClient {
 
   // Use idToken to check if the user is authenticated.
   Future<bool> get isAuthenticated async {
-    bool result = await _tokenStorage.idToken != null;
-    return result;
+    return await _tokenStorage.idToken != null;
   }
 
   Future<String?> get idToken async {
@@ -362,7 +361,12 @@ class LogtoClient {
   }
 
   Future<String> _getCallbackUrl(Uri url) async {
-    if (!await launchUrl(url)) {
+    final LaunchMode launchMode =
+        _callbackStrategy.launchMode == BrowserLaunchMode.platformDefault
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication;
+
+    if (!await launchUrl(url, mode: launchMode)) {
       throw Exception('Could not launch ${url.toString()}');
     }
 
@@ -374,8 +378,7 @@ class LogtoClient {
   Future<Uri> _athuneticateUserFlow() async {
     late Uri result;
 
-    if (_callbackStrategy.strategy == CallbackStrategyType.scheme)
-    {
+    if (_callbackStrategy.strategy == CallbackStrategyType.scheme) {
       await awaitUriLinkStream(
         appLinks.uriLinkStream,
         (uri) async {
@@ -390,7 +393,8 @@ class LogtoClient {
       return result;
     }
 
-    final server = await HttpServer.bind(InternetAddress.anyIPv4, (_callbackStrategy as LocalServerStrategy).port);
+    final server = await HttpServer.bind(InternetAddress.anyIPv4,
+        (_callbackStrategy as LocalServerStrategy).port);
 
     await for (HttpRequest request in server) {
       // Handle the request
