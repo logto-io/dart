@@ -1,6 +1,8 @@
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import '/src/exceptions/logto_auth_exceptions.dart';
 import '/src/interfaces/logto_interfaces.dart';
@@ -8,9 +10,9 @@ import '/src/modules/id_token.dart';
 import '/src/modules/logto_storage_strategy.dart';
 import '/src/modules/pkce.dart';
 import '/src/modules/token_storage.dart';
+import '/src/utilities/constants.dart';
 import '/src/utilities/utils.dart' as utils;
 import 'logto_core.dart' as logto_core;
-import '/src/utilities/constants.dart';
 
 export '/src/exceptions/logto_auth_exceptions.dart';
 export '/src/interfaces/logto_interfaces.dart';
@@ -229,10 +231,16 @@ class LogtoClient {
 
       final redirectUriScheme = Uri.parse(redirectUri).scheme;
 
-      final String callbackUri = await FlutterWebAuth.authenticate(
+      final String callbackUri = await FlutterWebAuth2.authenticate(
         url: signInUri.toString(),
         callbackUrlScheme: redirectUriScheme,
-        preferEphemeral: true,
+        options: const FlutterWebAuth2Options(
+          /// Prefer ephemeral web views for the sign-in flow. Only has an effect on Android.
+          intentFlags: ephemeralIntentFlags,
+
+          /// Prefer ephemeral web views for the sign-in flow. Only has an effect on iOS.
+          preferEphemeral: true,
+        ),
       );
 
       await _handleSignInCallback(callbackUri, redirectUri, httpClient);
@@ -275,7 +283,7 @@ class LogtoClient {
   }
 
   // Sign out the user.
-  Future<void> signOut() async {
+  Future<void> signOut(String redirectUri) async {
     // Throw error is authentication status not found
     final idToken = await _tokenStorage.idToken;
 
@@ -306,6 +314,24 @@ class LogtoClient {
       }
 
       await _tokenStorage.clear();
+
+      // Redirect to the end session endpoint it the platform is not iOS
+      // iOS uses the preferEphemeral flag on the sign-in flow, it will not preserve the session.
+      // For Android and Web, we need to redirect to the end session endpoint to clear the session manually.
+      if (kIsWeb || !Platform.isIOS) {
+        final signOutUri = logto_core.generateSignOutUri(
+            endSessionEndpoint: oidcConfig.endSessionEndpoint,
+            clientId: config.appId,
+            postLogoutRedirectUri: Uri.parse(redirectUri));
+        final redirectUriScheme = Uri.parse(redirectUri).scheme;
+
+        // Execute the sign-out flow asynchronously, this should not block the main app to render the UI.
+        await FlutterWebAuth2.authenticate(
+            url: signOutUri.toString(),
+            callbackUrlScheme: redirectUriScheme,
+            options: const FlutterWebAuth2Options(
+                intentFlags: ephemeralIntentFlags));
+      }
     } finally {
       if (_httpClient == null) {
         httpClient.close();

@@ -22,7 +22,7 @@ LogtoCodeTokenResponse _$LogtoCodeTokenResponseFromJson(
     accessToken: json['access_token'] as String,
     idToken: json['id_token'] as String,
     scope: json['scope'] as String,
-    expiresIn: json['expires_in'] as int,
+    expiresIn: (json['expires_in'] as num).toInt(),
     refreshToken: json['refresh_token'] as String?,
   );
 }
