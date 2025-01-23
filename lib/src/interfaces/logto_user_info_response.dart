@@ -25,6 +25,8 @@ class LogtoUserInfoResponse {
   final Map<String, dynamic>? customData;
   @JsonKey(name: 'identities')
   final Map<String, dynamic>? identities;
+  @JsonKey(name: 'roles')
+  final List<String>? roles;
   @JsonKey(name: 'organizations')
   final List<String>? organizations;
   @JsonKey(name: 'organization_roles')
@@ -43,6 +45,7 @@ class LogtoUserInfoResponse {
     this.phoneNumberVerified,
     this.customData,
     this.identities,
+    this.roles,
     this.organizations,
     this.organizationRoles,
     this.organizationData,

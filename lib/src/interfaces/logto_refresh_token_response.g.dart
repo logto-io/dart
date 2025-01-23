@@ -17,7 +17,7 @@ LogtoRefreshTokenResponse _$LogtoRefreshTokenResponseFromJson(
     accessToken: json['access_token'] as String,
     refreshToken: json['refresh_token'] as String?,
     idToken: json['id_token'] as String?,
-    expiresIn: json['expires_in'] as int,
+    expiresIn: (json['expires_in'] as num).toInt(),
     scope: json['scope'] as String,
   );
 }

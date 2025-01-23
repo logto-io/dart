@@ -10,8 +10,6 @@ extension LogtoReservedResourceExtension on LogtoReservedResource {
     switch (this) {
       case LogtoReservedResource.organization:
         return 'urn:logto:resource:organizations';
-      default:
-        throw Exception("Invalid value");
     }
   }
 }
@@ -60,8 +58,6 @@ extension LogtoUserScopeUserScopeExtension on LogtoUserScope {
         return 'urn:logto:scope:organizations';
       case LogtoUserScope.organizationRoles:
         return 'urn:logto:scope:organization_roles';
-      default:
-        throw Exception("Invalid value");
     }
   }
 }
