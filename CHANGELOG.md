@@ -1,3 +1,89 @@
+## 3.0.0
+
+### Dependencies update
+
+1. Switch to flutter_web_auth_2 package
+   Replace the legacy [flutter_web_auth](https://pub.dev/packages/flutter_web_auth) package with the new [flutter_web_auth_2](https://pub.dev/packages/flutter_web_auth_2). Since the `flutter_web_auth` package is no longer maintained, we have to switch to the new package to support the latest Flutter versions.
+
+   **flutter_web_auth_2** setup guide:
+
+   - iOS: No additional setup required
+   - Android: In order to capture the callback URL. You wil need to add the following activity to your AndroidManifest.xml file. Replace `YOUR_CALLBACK_URL_SCHEME_HERE` with your actual callback URL scheme (io.logto etc.).
+
+     ```xml
+     <manifest>
+      <application>
+
+         <activity
+            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+            android:exported="true">
+            <intent-filter android:label="flutter_web_auth_2">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="YOUR_CALLBACK_URL_SCHEME_HERE" />
+            </intent-filter>
+         </activity>
+
+      </application>
+      </manifest>
+     ```
+
+     Remove any `android:taskAffinity` entries and add set `android:launchMode="singleTop"` to the main activity in the AndroidManifest.xml file.
+
+   - Web: Create a new endpoint to capture the callback URL and sent it back to the application using `postMessage` API. The endpoint should be the same as the `redirectUri` parameter in the `signIn` method.
+
+     ```html
+     <!DOCTYPE html>
+     <title>Authentication complete</title>
+     <p>
+       Authentication is complete. If this does not happen automatically, please
+       close the window.
+     </p>
+     <script>
+       function postAuthenticationMessage() {
+         const message = {
+           "flutter-web-auth-2": window.location.href,
+         };
+
+         if (window.opener) {
+           window.opener.postMessage(message, window.location.origin);
+           window.close();
+         } else if (window.parent && window.parent !== window) {
+           window.parent.postMessage(message, window.location.origin);
+         } else {
+           localStorage.setItem("flutter-web-auth-2", window.location.href);
+           window.close();
+         }
+       }
+
+       postAuthenticationMessage();
+     </script>
+     ```
+
+     Please check the setup guide in the [flutter_web_auth_2](https://pub.dev/packages/flutter_web_auth_2#setup) package for more details.
+
+2. Other patches
+   - bump crypto package
+   - bump jose package
+   - bump json_annotation package
+
+### New features
+
+1. With the latest `flutter_web_auth_2` package, this SDK now supports the Web platform. You can use Logto dart SDK in your Flutter web projects as well. Officially supported platforms are iOS, Android, and Web.
+
+### Bug fixes
+
+1. Fix the namespace missing issue when building with the latest Gradle version on Android. ([#75](https://github.com/logto-io/dart/issues/75))
+2. Fix the issue that the webview is not closing after the user completes the OAuth2 authorization flow on Android. ([60](https://github.com/logto-io/dart/issues/60))
+3. Fix the issue on Android that the sign-in session is not cleared after the user signs out.
+
+### Breaking changes
+
+`logtoClient.signOut` method now requires a `redirectUri` parameter. For iOS platform, this parameter is useless, but for Android and Web platforms which require an additional `end_session` request to clean up the sign-in session, this parameter will be used as the `post_logout_redirect_uri` parameter in the `end_session` request.
+
+User experience on iOS will not be affected by this change, but for Android and Web platforms, when users click the sign-out button, an `end_session` request will be triggered by opening a webview with the `post_logout_redirect_uri` parameter set to the `redirectUri` value. This will clear the sign-in session and redirect the user back to the `redirectUri` page.
+
 ## 2.1.0
 
 ### New features
