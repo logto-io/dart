@@ -77,3 +77,29 @@ Check [Flutter SDK guide](https://docs.logto.io/quick-starts/flutter) for more d
 ## Supported platforms
 
 iOS, Android, Web
+
+## Migration guide
+
+:::note
+For SDK version before 3.0.0, this SDK uses the [flutter_web_auth](https://pub.dev/packages/flutter_web_auth) package.
+:::
+
+1. Upgrade to the latest version
+
+```yaml
+dependencies:
+  logto_dart_sdk: ^3.0.0
+```
+
+2. Update the manifest files (Android platform only)
+
+Replace the flutter_web_auth callback activity with the new `flutter_web_auth_2` in the AndroidManifest.xml file.
+
+- FlutterWebAuth -> FlutterWebAuth2
+- flutter_web_auth -> flutter_web_auth_2
+
+3. `redirectUri` parameter is now required for the `signOut` method.
+
+```dart
+await logtoClient.signOut(redirectUri);
+```
