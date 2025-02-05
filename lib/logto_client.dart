@@ -189,6 +189,12 @@ class LogtoClient {
     }
   }
 
+  // Clear the access token by resource indicator or organizationId.
+  Future<void> clearAccessToken({String? resource, String? organizationId}) {
+    return _tokenStorage.deleteAccessToken(
+        resource: resource, organizationId: organizationId);
+  }
+
   // Sign in using the PKCE flow.
   Future<void> signIn(
     String redirectUri, {

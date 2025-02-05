@@ -170,5 +170,20 @@ void main() {
       expect(
           await storageStrategy.read(key: _TokenStorageKeys.idTokenKey), null);
     });
+
+    test('deleteAccessToken method should delete persisted state', () async {
+      await sut.save(
+          idToken: idToken,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          expiresIn: 1);
+
+      await sut.setAccessToken('tokenX', resource: resource, expiresIn: 3600);
+      expect(await sut.getAccessToken(resource: resource), isNotNull);
+
+      await sut.deleteAccessToken(resource: resource);
+
+      expect(await sut.getAccessToken(resource: resource), null);
+    });
   });
 }

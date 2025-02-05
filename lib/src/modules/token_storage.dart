@@ -110,6 +110,16 @@ class TokenStorage {
     return accessToken;
   }
 
+  Future<void> deleteAccessToken({
+    String? resource,
+    String? organizationId,
+  }) async {
+    final key =
+        buildAccessTokenKey(resource: resource, organizationId: organizationId);
+
+    await _deleteAccessToken(key);
+  }
+
   Future<void> _deleteAccessToken(String accessTokenKey) async {
     final Map<String, AccessToken> tempAccessTokenMap =
         Map.from(_accessTokenMap ?? {});
