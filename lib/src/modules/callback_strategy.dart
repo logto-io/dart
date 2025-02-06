@@ -44,6 +44,6 @@ class LocalServerStrategy implements CallbackStrategy {
   int get port => _port;
   
   @override
-  BrowserLaunchMode get launchMode => throw _launchMode;
+  BrowserLaunchMode get launchMode => _launchMode;
   
 }
