@@ -44,7 +44,7 @@ export '/src/modules/callback_strategy.dart';
  */
 final appLinks = AppLinks();
 
-class LogtoClient {
+class LogtoClientCustom {
   final LogtoConfig config;
 
   late PKCE _pkce;
@@ -64,7 +64,7 @@ class LogtoClient {
 
   late final CallbackStrategy _callbackStrategy;
 
-  LogtoClient(
+  LogtoClientCustom(
       {required this.config,
       LogtoStorageStrategy? storageProvider,
       http.Client? httpClient,
