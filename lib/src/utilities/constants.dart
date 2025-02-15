@@ -43,8 +43,6 @@ extension InteractionModeExtension on InteractionMode {
         return 'signIn';
       case InteractionMode.signUp:
         return 'signUp';
-      default:
-        throw Exception("Invalid value");
     }
   }
 }
@@ -78,8 +76,6 @@ extension FirstScreenExtension on FirstScreen {
         return 'identifier:register';
       case FirstScreen.singleSignOn:
         return 'single_sign_on';
-      default:
-        throw Exception("Invalid value");
     }
   }
 }
@@ -104,8 +100,6 @@ extension IdentifierTypeExtension on IdentifierType {
         return 'phone';
       case IdentifierType.username:
         return 'username';
-      default:
-        throw Exception("Invalid value");
     }
   }
 }
