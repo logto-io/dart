@@ -243,7 +243,7 @@ class LogtoClient {
         callbackUrlScheme: redirectUriScheme,
         options: const FlutterWebAuth2Options(
           /// Prefer ephemeral web views for the sign-in flow. Only has an effect on Android.
-          intentFlags: ephemeralIntentFlags,
+        //  intentFlags: ephemeralIntentFlags,
 
           /// Prefer ephemeral web views for the sign-in flow. Only has an effect on iOS.
           preferEphemeral: true,
