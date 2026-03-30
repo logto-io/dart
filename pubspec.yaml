@@ -17,7 +17,7 @@ dependencies:
   jose: ^0.3.4
   json_annotation: ^4.9.0
   path: ^1.8.1
-  flutter_web_auth_2: ^4.1.0
+  flutter_web_auth_2: ^5.0.0
 
 dev_dependencies:
   flutter_test:
