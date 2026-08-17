@@ -8,7 +8,7 @@
 
 # Logto Flutter SDK
 
-[![Build Status](https://github.com/logto-io/kotlin/actions/workflows/main.yml/badge.svg)](https://github.com/logto-io/dart/actions/workflows/main.yml)
+[![Build Status](https://github.com/logto-io/dart/actions/workflows/main.yml/badge.svg)](https://github.com/logto-io/dart/actions/workflows/main.yml)
 
 This project is the official Flutter SDK for [Logto](https://logto.io). It provides a simple way to integrate Logto into your Flutter project.
 
@@ -20,7 +20,7 @@ Add the following dependencies to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  logto_dart_sdk: ^3.0.0
+  logto_dart_sdk: ^4.0.0
 ```
 
 Then run `flutter pub get` to install the package.
@@ -77,6 +77,15 @@ Check [Flutter SDK guide](https://docs.logto.io/quick-starts/flutter) for more d
 ## Supported platforms
 
 iOS, Android, Web
+
+## Minimum requirements
+
+| Requirement | Version |
+| ----------- | ------- |
+| Dart SDK    | 3.8.0   |
+| Flutter     | 3.32.0  |
+| Android     | API 24 (`minSdkVersion 24`, `compileSdk 37`) |
+| iOS         | 17.4    |
 
 ## Migration guide
 

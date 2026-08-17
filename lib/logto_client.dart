@@ -242,10 +242,8 @@ class LogtoClient {
         url: signInUri.toString(),
         callbackUrlScheme: redirectUriScheme,
         options: const FlutterWebAuth2Options(
-          /// Prefer ephemeral web views for the sign-in flow. Only has an effect on Android.
-          intentFlags: ephemeralIntentFlags,
-
-          /// Prefer ephemeral web views for the sign-in flow. Only has an effect on iOS.
+          /// Prefer ephemeral web sessions for the sign-in flow.
+          /// Has an effect on iOS, Android and macOS.
           preferEphemeral: true,
         ),
       );
@@ -336,8 +334,7 @@ class LogtoClient {
         await FlutterWebAuth2.authenticate(
             url: signOutUri.toString(),
             callbackUrlScheme: redirectUriScheme,
-            options: const FlutterWebAuth2Options(
-                intentFlags: ephemeralIntentFlags));
+            options: const FlutterWebAuth2Options(preferEphemeral: true));
       }
     } finally {
       if (_httpClient == null) {

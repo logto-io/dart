@@ -1,3 +1,23 @@
+## 4.0.0
+
+### Dependencies update
+
+Modernize the plugin dependencies so apps keep building on recent Flutter and Android toolchains. Starting with Android Gradle Plugin (AGP) 9.0, applying the Kotlin Gradle Plugin (KGP) from a plugin is no longer supported, which breaks builds that depend on older plugin versions. ([Flutter migration guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin))
+
+1. Bump `flutter_secure_storage` from `^9.0.0` to `^11.0.0`
+
+   - The Android implementation no longer uses the deprecated `encryptedSharedPreferences`. Tokens stored by previous SDK versions are automatically migrated to the new AES-GCM cipher on first access (`migrateOnAlgorithmChange` is enabled by default).
+   - Android now requires `minSdkVersion` 24 and `compileSdk` 37.
+
+2. Bump `flutter_web_auth_2` from `^4.1.0` to `^5.1.0`
+
+   - iOS 17.4+ and macOS 14.4+ are now required.
+   - It is strongly advised to set `android:taskAffinity=""` on all exported activities (including your `MainActivity` and the `flutter_web_auth_2` `CallbackActivity`) in the AndroidManifest.xml file. See the updated example app.
+
+3. Require Dart SDK `^3.8.0` and Flutter `>=3.32.0`.
+
+> **Note**: `flutter_web_auth_2` `5.x` still applies the Kotlin Gradle Plugin on Android, so it does not yet build with AGP 9. Flutter's temporary KGP compatibility keeps it working on current Flutter releases. Full AGP 9 support lands in `flutter_web_auth_2` `6.x` (in alpha at the time of writing), which we will adopt once it is stable.
+
 ## 3.0.0
 
 ### Dependencies update

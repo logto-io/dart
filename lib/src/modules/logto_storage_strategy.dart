@@ -12,11 +12,10 @@ abstract class LogtoStorageStrategy {
 }
 
 class SecureStorageStrategy implements LogtoStorageStrategy {
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
-  );
+  /// Uses the default [AndroidOptions] on Android: AES-GCM encrypted storage
+  /// with automatic migration of data written by older versions
+  /// (`migrateOnAlgorithmChange` is enabled by default).
+  final _storage = const FlutterSecureStorage();
 
   @override
   Future<void> delete({required String key}) async {

@@ -56,7 +56,6 @@ class OpenIdClaims extends JsonWebTokenClaims with UserInfo {
   @override
   DateTime get issuedAt => super.issuedAt!;
 
-  @override
   OpenIdClaims.fromJson(Map<String, dynamic> super.json) : super.fromJson();
 }
 
