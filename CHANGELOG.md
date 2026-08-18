@@ -4,17 +4,22 @@
 
 Modernize the plugin dependencies so apps keep building on recent Flutter and Android toolchains. Starting with Android Gradle Plugin (AGP) 9.0, applying the Kotlin Gradle Plugin (KGP) from a plugin is no longer supported, which breaks builds that depend on older plugin versions. ([Flutter migration guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin))
 
-1. Bump `flutter_secure_storage` from `^9.0.0` to `^11.0.0`
+1. Bump `flutter_secure_storage` from `^9.0.0` to `^10.3.1`
 
-   - The Android implementation no longer uses the deprecated `encryptedSharedPreferences`. Tokens stored by previous SDK versions are automatically migrated to the new AES-GCM cipher on first access (`migrateOnAlgorithmChange` is enabled by default).
-   - Android now requires `minSdkVersion` 24 and `compileSdk` 37.
+   - `10.x` no longer applies the Kotlin Gradle Plugin, which is what unblocks AGP 9 builds.
+   - The Android implementation no longer uses the deprecated Jetpack `encryptedSharedPreferences` backend. Tokens written by SDK `3.x` are read and migrated to the new AES-GCM cipher storage on first access, since `migrateOnAlgorithmChange` defaults to true. Existing users stay signed in across the upgrade.
+   - Android now requires `minSdkVersion` 23.
+
+   > **Note**: this SDK intentionally stays on `flutter_secure_storage` `10.x` rather than `11.x`. The `11.x` release removed the `EncryptedSharedPreferences` backend outright, so upgrading directly from `9.x` to `11.x` makes tokens written by SDK `3.x` unreadable and silently signs existing Android users out. `10.x` is the migration bridge. A future major release will move to `11.x` once users have had a release to migrate through.
 
 2. Bump `flutter_web_auth_2` from `^4.1.0` to `^5.1.0`
 
    - iOS 17.4+ and macOS 14.4+ are now required.
    - It is strongly advised to set `android:taskAffinity=""` on all exported activities (including your `MainActivity` and the `flutter_web_auth_2` `CallbackActivity`) in the AndroidManifest.xml file. See the updated example app.
 
-3. Require Dart SDK `^3.8.0` and Flutter `>=3.32.0`.
+3. Bump `jose` to `^0.3.5+1`, which resolves [GHSA-vm9r-h74p-hg97](https://github.com/advisories/GHSA-vm9r-h74p-hg97) (untrusted JWK header key acceptance during signature verification). This SDK uses `jose` to verify ID tokens, so the dependency floor is raised rather than only the lockfile.
+
+4. Require Dart SDK `^3.5.0` and Flutter `>=3.24.0`.
 
 > **Note**: `flutter_web_auth_2` `5.x` still applies the Kotlin Gradle Plugin on Android, so it does not yet build with AGP 9. Flutter's temporary KGP compatibility keeps it working on current Flutter releases. Full AGP 9 support lands in `flutter_web_auth_2` `6.x` (in alpha at the time of writing), which we will adopt once it is stable.
 

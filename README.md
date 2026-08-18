@@ -82,9 +82,9 @@ iOS, Android, Web
 
 | Requirement | Version |
 | ----------- | ------- |
-| Dart SDK    | 3.8.0   |
-| Flutter     | 3.32.0  |
-| Android     | API 24 (`minSdkVersion 24`, `compileSdk 37`) |
+| Dart SDK    | 3.5.0   |
+| Flutter     | 3.24.0  |
+| Android     | API 23 (`minSdkVersion 23`) |
 | iOS         | 17.4    |
 
 ## Migration guide

@@ -5,16 +5,16 @@ homepage: https://github.com/logto-io/dart
 documentation: https://docs.logto.io/sdk/flutter/
 
 environment:
-  sdk: "^3.8.0"
-  flutter: ">=3.32.0"
+  sdk: "^3.5.0"
+  flutter: ">=3.24.0"
 
 dependencies:
   crypto: ^3.0.6
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^11.0.0
+  flutter_secure_storage: ^10.3.1
   http: ^1.2.0
-  jose: ^0.3.4
+  jose: ^0.3.5+1
   json_annotation: ^4.9.0
   path: ^1.8.1
   flutter_web_auth_2: ^5.1.0
