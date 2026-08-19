@@ -14,7 +14,7 @@ Modernize the plugin dependencies so apps keep building on recent Flutter and An
 
 2. Bump `flutter_web_auth_2` from `^4.1.0` to `^5.1.0`
 
-   - iOS 17.4+ and macOS 14.4+ are now required.
+   - This plugin does not raise the iOS or macOS deployment floor: its podspecs still target iOS 11.0 / macOS 10.15. The SDK's floors of iOS 13.0 / macOS 10.15 come from Flutter 3.35 itself. iOS 17.4 / macOS 14.4 are needed only for HTTPS (universal link) callbacks — `flutter_web_auth_2` gates `ASWebAuthenticationSession.Callback` behind `#available` and falls back to the `callbackURLScheme:` initializer below those versions, which is the path this SDK uses with `callbackUrlScheme`.
    - It is strongly advised to set `android:taskAffinity=""` on all exported activities (including your `MainActivity` and the `flutter_web_auth_2` `CallbackActivity`) in the AndroidManifest.xml file. See the updated example app.
 
 3. Bump `jose` to `^0.3.5+1`, which resolves [GHSA-vm9r-h74p-hg97](https://github.com/advisories/GHSA-vm9r-h74p-hg97) (untrusted JWK header key acceptance during signature verification). This SDK uses `jose` to verify ID tokens, so the dependency floor is raised rather than only the lockfile.

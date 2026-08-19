@@ -86,13 +86,26 @@ iOS, Android, Web
 | Flutter     | 3.35.0  |
 | Android Gradle Plugin | 8.9.1 |
 | Android     | `compileSdk 36`, `minSdkVersion 24` |
-| iOS         | 17.4    |
+| iOS         | 13.0    |
+| macOS       | 10.15   |
 
 The Android floor is set by `flutter_web_auth_2` 5.x, which compiles against SDK 36 and pulls
 `androidx.browser:browser:1.9.0` (`minCompileSdk=36`, `minAndroidGradlePluginVersion=8.9.1`).
 Flutter 3.35.0 is the first release whose template ships AGP 8.9.1 and defaults
 `flutter.compileSdkVersion` to 36, so earlier Flutter versions fail at
 `:app:checkDebugAarMetadata` even though the Dart-level constraints resolve.
+
+The iOS and macOS floors are set by Flutter 3.35 itself, not by the plugins — Flutter 3.35
+targets iOS 13.0 / macOS 10.15, while the plugins allow lower (`flutter_secure_storage`
+iOS 12.0 / macOS 10.14, `flutter_web_auth_2` iOS 11.0 / macOS 10.15). Building on a newer
+Flutter raises these further (3.47 targets iOS 15.0 / macOS 12.0); that follows from the
+Flutter version you choose, not from this SDK.
+
+**iOS 17.4 / macOS 14.4 are only required for HTTPS (universal link) callbacks.**
+`flutter_web_auth_2` gates `ASWebAuthenticationSession.Callback` behind
+`#available(iOS 17.4, *)` / `#available(macOS 14.4, *)` and falls back to the
+`callbackURLScheme:` initializer below those versions. This SDK passes `callbackUrlScheme`,
+so a custom-scheme redirect such as `io.logto://callback` works on the floors above.
 
 ## Migration guide
 
@@ -104,7 +117,7 @@ For SDK version before 3.0.0, this SDK uses the [flutter_web_auth](https://pub.d
 
 ```yaml
 dependencies:
-  logto_dart_sdk: ^3.0.0
+  logto_dart_sdk: ^4.0.0
 ```
 
 2. Update the manifest files (Android platform only)
