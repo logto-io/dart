@@ -1,8 +1,27 @@
 ## 4.0.0
 
+Modernizes the dependency stack so apps keep building on recent Flutter and Android
+toolchains. **No Dart API changed in this release, and existing users stay signed in** —
+tokens stored by `3.x` are migrated automatically on first read.
+
+### What you need to do
+
+All of the required work is in your app's Android configuration. See the
+[3.x to 4.0 migration guide](https://github.com/logto-io/dart#upgrading-from-3x-to-40)
+for copy-pasteable snippets.
+
+| Change | Where |
+| ------ | ----- |
+| Flutter `>=3.35.0`, Dart `^3.9.0` | your toolchain |
+| Android Gradle Plugin `>=8.9.1` | `android/settings.gradle` |
+| `compileSdk 36`, `minSdk 24` — both are the Flutter 3.35+ defaults, so no change if you use them | `android/app/build.gradle` |
+| `android:taskAffinity=""` on exported activities | `android/app/src/main/AndroidManifest.xml` |
+
 ### Dependencies update
 
-Modernize the plugin dependencies so apps keep building on recent Flutter and Android toolchains. Starting with Android Gradle Plugin (AGP) 9.0, applying the Kotlin Gradle Plugin (KGP) from a plugin is no longer supported, which breaks builds that depend on older plugin versions. ([Flutter migration guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin))
+Starting with Android Gradle Plugin (AGP) 9.0, applying the Kotlin Gradle Plugin (KGP) from a
+plugin is no longer supported, which breaks builds that depend on older plugin versions.
+([Flutter migration guide](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin))
 
 1. Bump `flutter_secure_storage` from `^9.0.0` to `^10.3.1`
 
