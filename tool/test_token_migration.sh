@@ -30,10 +30,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 readonly EXAMPLE="$PWD/example"
 readonly PUBSPEC="$EXAMPLE/pubspec.yaml"
+readonly PUBSPEC_LOCK="$EXAMPLE/pubspec.lock"
 readonly APK="$EXAMPLE/build/app/outputs/flutter-apk/app-debug.apk"
 readonly PACKAGE="com.example.example"
 readonly MARKER="LOGTO_MIGRATION_RESULT"
 BACKUP="$(mktemp)"
+LOCK_BACKUP="$(mktemp)"
 
 DEVICE="${1:-}"
 if [[ -z "$DEVICE" ]]; then
@@ -46,10 +48,17 @@ fi
 export ANDROID_SERIAL="$DEVICE"
 echo "==> device: $DEVICE"
 
+# pubspec.lock is tracked, and both phases rewrite it via `flutter pub get`. Restoring it
+# from a snapshot rather than regenerating it keeps the working tree clean even when
+# resolution would now pick different versions (a newer 10.x, a different Dart SDK).
 cp "$PUBSPEC" "$BACKUP"
+cp "$PUBSPEC_LOCK" "$LOCK_BACKUP"
 cleanup() {
   cp "$BACKUP" "$PUBSPEC"
-  rm -f "$BACKUP"
+  cp "$LOCK_BACKUP" "$PUBSPEC_LOCK"
+  rm -f "$BACKUP" "$LOCK_BACKUP"
+  # Re-resolve so .dart_tool matches the restored files again. pub honours an existing
+  # lockfile whose versions still satisfy the constraints, so this leaves it untouched.
   (cd "$EXAMPLE" && flutter pub get >/dev/null 2>&1) || true
 }
 trap cleanup EXIT
@@ -106,6 +115,7 @@ run_phase "phase A (flutter_secure_storage 9.2.4, writes v9 data)" \
 # Phase B: drop the override so the SDK's own ^10.3.1 constraint resolves, then read the
 # same keys back through the class 4.0 ships -- over the data directory phase A left.
 cp "$BACKUP" "$PUBSPEC"
+cp "$LOCK_BACKUP" "$PUBSPEC_LOCK"
 (cd "$EXAMPLE" && flutter pub get >/dev/null)
 run_phase "phase B (flutter_secure_storage 10.x, reads after upgrade)" \
   tool_migration/migration_read_main.dart keep

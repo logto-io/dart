@@ -213,27 +213,31 @@ WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KG
 That warning is expected and harmless for now. Full AGP 9 support requires `flutter_web_auth_2`
 6.x, which is still in alpha at the time of writing; this SDK will adopt it once it is stable.
 
-### Upgrading to 3.0.0 from a version before 3.0.0
+### Upgrading from a version before 3.0.0
+
+> **Both sections apply.** Upgrading from 2.x lands you on 4.0, so complete
+> [Upgrading from 3.x to 4.0](#upgrading-from-3x-to-40) above — Flutter 3.35, AGP 8.9.1,
+> `compileSdk 36` / `minSdk 24`, and `android:taskAffinity=""` — **and** the additional changes
+> below. Skipping the 4.0 steps leaves Android either failing to build or returning the sign-in
+> callback to the wrong task.
 
 :::note
 For SDK versions before 3.0.0, this SDK uses the [flutter_web_auth](https://pub.dev/packages/flutter_web_auth) package.
 :::
 
-1. Upgrade to the latest version
+These changes are on top of the 3.x to 4.0 steps; the dependency bump is covered there.
 
-```yaml
-dependencies:
-  logto_dart_sdk: ^4.0.0
-```
-
-2. Update the manifest files (Android platform only)
+1. Update the manifest files (Android platform only)
 
 Replace the flutter_web_auth callback activity with the new `flutter_web_auth_2` in the AndroidManifest.xml file.
 
 - FlutterWebAuth -> FlutterWebAuth2
 - flutter_web_auth -> flutter_web_auth_2
 
-3. `redirectUri` parameter is now required for the `signOut` method.
+The `CallbackActivity` you end up with should also carry the `android:taskAffinity=""` and
+`android:launchMode="singleTop"` attributes from step 5 of the 4.0 section.
+
+2. `redirectUri` parameter is now required for the `signOut` method.
 
 ```dart
 await logtoClient.signOut(redirectUri);

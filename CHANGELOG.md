@@ -17,6 +17,11 @@ for copy-pasteable snippets.
 | `compileSdk 36`, `minSdk 24` — both are the Flutter 3.35+ defaults, so no change if you use them | `android/app/build.gradle` |
 | `android:taskAffinity=""` on exported activities | `android/app/src/main/AndroidManifest.xml` |
 
+Upgrading from a version before `3.0.0` lands you on `4.0.0` directly, so the
+[pre-3.0 migration steps](https://github.com/logto-io/dart#upgrading-from-a-version-before-300)
+(manifest rename, `signOut` now requiring `redirectUri`) apply **in addition to** the table
+above — not instead of it.
+
 ### Dependencies update
 
 Starting with Android Gradle Plugin (AGP) 9.0, applying the Kotlin Gradle Plugin (KGP) from a
