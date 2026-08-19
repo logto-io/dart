@@ -84,6 +84,43 @@ jobs:
         working-directory: ./example
         run: flutter build apk --debug
 
+  # Verifies that tokens written by SDK 3.x (flutter_secure_storage 9.x, Jetpack
+  # EncryptedSharedPreferences) are still readable after upgrading to 4.0. This is what
+  # keeps the flutter_secure_storage constraint from being raised past 10.x: 11.x
+  # deleted the migration bridge, and losing it signs existing Android users out
+  # silently. Needs a real device, hence the emulator.
+  token-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run token migration upgrade test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          disable-animations: true
+          script: ./tool/test_token_migration.sh
+
   # Validates the `environment.flutter` floor declared in pubspec.yaml. The example app
   # ships an AGP 9 configuration (built-in Kotlin), which the floor release predates, so
   # the Android project is reverted to the toolchain a Flutter 3.35 app would generate
