@@ -8,7 +8,7 @@ Modernize the plugin dependencies so apps keep building on recent Flutter and An
 
    - `10.x` no longer applies the Kotlin Gradle Plugin, which is what unblocks AGP 9 builds.
    - The Android implementation no longer uses the deprecated Jetpack `encryptedSharedPreferences` backend. Tokens written by SDK `3.x` are read and migrated to the new AES-GCM cipher storage on first access, since `migrateOnAlgorithmChange` defaults to true. Existing users stay signed in across the upgrade.
-   - Android now requires `minSdkVersion` 23.
+   - Android now requires `minSdkVersion` 24 (`flutter_secure_storage` needs 23; `flutter_web_auth_2` and the Flutter 3.35 default raise it to 24).
 
    > **Note**: this SDK intentionally stays on `flutter_secure_storage` `10.x` rather than `11.x`. The `11.x` release removed the `EncryptedSharedPreferences` backend outright, so upgrading directly from `9.x` to `11.x` makes tokens written by SDK `3.x` unreadable and silently signs existing Android users out. `10.x` is the migration bridge. A future major release will move to `11.x` once users have had a release to migrate through.
 
@@ -19,7 +19,9 @@ Modernize the plugin dependencies so apps keep building on recent Flutter and An
 
 3. Bump `jose` to `^0.3.5+1`, which resolves [GHSA-vm9r-h74p-hg97](https://github.com/advisories/GHSA-vm9r-h74p-hg97) (untrusted JWK header key acceptance during signature verification). This SDK uses `jose` to verify ID tokens, so the dependency floor is raised rather than only the lockfile.
 
-4. Require Dart SDK `^3.5.0` and Flutter `>=3.24.0`.
+4. Require Dart SDK `^3.9.0` and Flutter `>=3.35.0`.
+
+   This floor is set by the Android toolchain, not by the Dart-level constraints. `flutter_web_auth_2` `5.1.0` compiles against SDK 36 and depends on `androidx.browser:browser:1.9.0`, whose AAR metadata declares `minCompileSdk=36` and `minAndroidGradlePluginVersion=8.9.1`. Flutter `3.35.0` is the first release whose template ships AGP `8.9.1` and defaults `flutter.compileSdkVersion` to 36; on Flutter `3.24` (template AGP `7.3.0`, `compileSdk 34`) the build fails at `:app:checkDebugAarMetadata`. Apps that pin their own AGP must be on `8.9.1+` with `compileSdk 36`.
 
 > **Note**: `flutter_web_auth_2` `5.x` still applies the Kotlin Gradle Plugin on Android, so it does not yet build with AGP 9. Flutter's temporary KGP compatibility keeps it working on current Flutter releases. Full AGP 9 support lands in `flutter_web_auth_2` `6.x` (in alpha at the time of writing), which we will adopt once it is stable.
 

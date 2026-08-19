@@ -82,10 +82,17 @@ iOS, Android, Web
 
 | Requirement | Version |
 | ----------- | ------- |
-| Dart SDK    | 3.5.0   |
-| Flutter     | 3.24.0  |
-| Android     | API 23 (`minSdkVersion 23`) |
+| Dart SDK    | 3.9.0   |
+| Flutter     | 3.35.0  |
+| Android Gradle Plugin | 8.9.1 |
+| Android     | `compileSdk 36`, `minSdkVersion 24` |
 | iOS         | 17.4    |
+
+The Android floor is set by `flutter_web_auth_2` 5.x, which compiles against SDK 36 and pulls
+`androidx.browser:browser:1.9.0` (`minCompileSdk=36`, `minAndroidGradlePluginVersion=8.9.1`).
+Flutter 3.35.0 is the first release whose template ships AGP 8.9.1 and defaults
+`flutter.compileSdkVersion` to 36, so earlier Flutter versions fail at
+`:app:checkDebugAarMetadata` even though the Dart-level constraints resolve.
 
 ## Migration guide
 

@@ -5,8 +5,8 @@ homepage: https://github.com/logto-io/dart
 documentation: https://docs.logto.io/sdk/flutter/
 
 environment:
-  sdk: "^3.5.0"
-  flutter: ">=3.24.0"
+  sdk: "^3.9.0"
+  flutter: ">=3.35.0"
 
 dependencies:
   crypto: ^3.0.6

@@ -83,3 +83,45 @@ jobs:
       - name: Build example APK
         working-directory: ./example
         run: flutter build apk --debug
+
+  # Validates the `environment.flutter` floor declared in pubspec.yaml. The example app
+  # ships an AGP 9 configuration (built-in Kotlin), which the floor release predates, so
+  # the Android project is reverted to the toolchain a Flutter 3.35 app would generate
+  # before building. Keep FLUTTER_FLOOR in sync with `environment.flutter`.
+  build-android-floor:
+    runs-on: ubuntu-latest
+
+    env:
+      FLUTTER_FLOOR: 3.35.0
+      AGP_FLOOR: 8.9.1
+      GRADLE_FLOOR: 8.12
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_FLOOR }}
+
+      - name: Restore pre-AGP-9 android configuration
+        working-directory: ./example/android
+        run: |
+          sed -i "s/id \"com.android.application\" version \"[0-9.]*\"/id \"com.android.application\" version \"$AGP_FLOOR\"/" settings.gradle
+          sed -i "s|gradle-[0-9.]*-all.zip|gradle-$GRADLE_FLOOR-all.zip|" gradle/wrapper/gradle-wrapper.properties
+          sed -i "s|^    id \"com.android.application\"$|    id \"com.android.application\"\n    id \"kotlin-android\"|" app/build.gradle
+          sed -i "/^# This newDsl flag/,+3d" gradle.properties
+
+      - name: Install
+        run: flutter pub get
+
+      - name: Build example APK
+        working-directory: ./example
+        run: flutter build apk --debug
