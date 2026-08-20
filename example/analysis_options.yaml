@@ -7,6 +7,20 @@
 
 # The following line activates a set of recommended lints for Flutter apps,
 # packages, and plugins designed to encourage good coding practices.
+analyzer:
+  exclude:
+    # Phase A of the token-migration test deliberately uses the flutter_secure_storage
+    # 9.x API (`AndroidOptions.encryptedSharedPreferences`), which is ignored in the 10.x
+    # version this package resolves. tool/test_token_migration.sh pins 9.2.4 before
+    # building it; running that script is what checks it.
+    - tool_migration/migration_write_main.dart
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
