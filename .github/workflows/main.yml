@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -99,7 +99,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -140,7 +140,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 25
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
